@@ -1,0 +1,21 @@
+{
+  "description": "搜索关键词种子集，每个关键词会单独搜索一次然后合并去重",
+  "keywords": [
+    "agent",
+    "ai-agent",
+    "llm-agent",
+    "autonomous-agent",
+    "coding-agent",
+    "coding-assistant",
+    "copilot",
+    "agentic",
+    "agentic-ai",
+    "multi-agent",
+    "browser-agent",
+    "code-review-agent",
+    "ai-coding",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "note": "GitHub Search API 对 q 参数支持复杂查询。这里保持简单，每个关键词单独搜索。如需缩窄，可加 language:python 等限定。"
+}

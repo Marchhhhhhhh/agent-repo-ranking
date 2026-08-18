@@ -1,0 +1,36 @@
+{
+  "description": "社区维护的 Awesome 列表来源。脚本会拉取每个仓库的 README.md，用正则抽取所有 github.com/xxx/yyy 链接作为候选 Agent 仓库。",
+  "note": "Awesome 列表本身不入榜（会被 exclude-patterns 排除），只作为发现工具。",
+  "lists": [
+    {
+      "repo": "e2b-dev/awesome-ai-agents",
+      "readme_path": "README.md",
+      "note": "e2b 维护，产品型 Agent 覆盖较全"
+    },
+    {
+      "repo": "kyrolabs/awesome-agents",
+      "readme_path": "README.md",
+      "note": "包含框架和工具"
+    },
+    {
+      "repo": "hyp1231/awesome-llm-powered-agent",
+      "readme_path": "README.md",
+      "note": "偏学术，含论文和代码"
+    },
+    {
+      "repo": "slavakurilyak/awesome-ai-agents",
+      "readme_path": "README.md",
+      "note": "另一个综合列表"
+    },
+    {
+      "repo": "punkpeye/awesome-mcp-servers",
+      "readme_path": "README.md",
+      "note": "MCP 生态专项"
+    },
+    {
+      "repo": "modelcontextprotocol/servers",
+      "readme_path": "README.md",
+      "note": "官方 MCP 服务器列表"
+    }
+  ]
+}
