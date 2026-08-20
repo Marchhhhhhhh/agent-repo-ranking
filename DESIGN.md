@@ -215,7 +215,7 @@ IF repo in known_agent_seed_list THEN 强制收录
 │    · JSON（结构化，供后续处理）                          │
 │    · Markdown（人类可读，适合直接引用到文档）             │
 │    · CSV（Excel 分析用）                                 │
-│    · review-queue.md（人审队列，边界 case）              │
+│    · review-queue-YYYY-MM-DD.md（人审队列，边界 case）              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -254,12 +254,12 @@ IF repo in known_agent_seed_list THEN 强制收录
 
 ```
 output/
-├── snapshot-2026-07-14.json           # 完整数据
-├── ranking-active-top50.md            # 主榜 · 人类可读
-├── ranking-legacy-top20.md            # 历史榜 · 人类可读
-├── ranking-all.csv                    # Excel 用
-├── review-queue.md                    # 需人审的边界 case
-└── metadata.json                      # 快照日期、跑批参数、总耗时
+├── snapshot-YYYY-MM-DD.json           # 完整数据
+├── ranking-active-top50-YYYY-MM-DD.md            # 主榜 · 人类可读
+├── ranking-legacy-top20-YYYY-MM-DD.md            # 历史榜 · 人类可读
+├── ranking-all-YYYY-MM-DD.csv                    # Excel 用
+├── review-queue-YYYY-MM-DD.md                    # 需人审的边界 case
+└── metadata-YYYY-MM-DD.json                      # 快照日期、跑批参数、总耗时
 ```
 
 ---

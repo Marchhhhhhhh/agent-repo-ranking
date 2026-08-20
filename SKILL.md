@@ -101,12 +101,12 @@ Output files are written to `output/` by default, or to `--output-dir` if provid
 
 | 文件                             | 用途                       |
 | -------------------------------- | -------------------------- |
-| `ranking-active-top50.md`        | 主榜 · 人类可读 Markdown   |
-| `ranking-legacy-top20.md`        | 历史榜 · 补充生态演进脉络  |
-| `ranking-all.csv`                | Excel 分析用，含 `desc_cn` / `desc_en` |
-| `snapshot.json`                  | 完整结构化数据             |
-| `metadata.json`                  | 本次跑批参数与输出文件索引 |
-| `review-queue.md`                | 需要人工判定的边界 case    |
+| `ranking-active-top50-YYYY-MM-DD.md`        | 主榜 · 人类可读 Markdown   |
+| `ranking-legacy-top20-YYYY-MM-DD.md`        | 历史榜 · 补充生态演进脉络  |
+| `ranking-all-YYYY-MM-DD.csv`                | Excel 分析用，含 `desc_cn` / `desc_en` |
+| `snapshot-YYYY-MM-DD.json`                  | 完整结构化数据             |
+| `metadata-YYYY-MM-DD.json`                  | 本次跑批参数与输出文件索引 |
+| `review-queue-YYYY-MM-DD.md`                | 需要人工判定的边界 case    |
 
 Markdown 榜单会在表格后附上每个项目的 `CN / EN` 一句话描述，方便直接复用到中文或英文材料里。  
 Markdown files include `CN / EN` one-line summaries for each ranked project.
@@ -131,7 +131,7 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 ### 自动打标 + 人审兜底
 - 15 个关键词打形态标签（CLI、IDE-plugin、AI-IDE、Web-Builder 等）
 - 为上榜项目生成中英双语一句话描述
-- 打不上标签的进入 `review-queue.md` 等人工判定
+- 打不上标签的进入 `review-queue-YYYY-MM-DD.md` 等人工判定
 
 ## 配置文件（可以编辑） / Editable Config Files
 
@@ -145,7 +145,7 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 ### 维护建议 / Maintenance Tips
 
 - **每季度**过一遍 seed-repos.json，添加新出现的 Agent
-- **每次跑之后**打开 `review-queue.md`，判断边界 case 是否要收录
+- **每次跑之后**打开 `review-queue-YYYY-MM-DD.md`，判断边界 case 是否要收录
 
 ## 已知局限 / Limitations
 
@@ -171,11 +171,11 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 依次检查：
 1. star 数是否 ≥ 100（默认下限）
 2. 是否有近 6 个月的 push（否则进历史榜）
-3. 是否被排除规则误伤 → 查 `snapshot.json` 的 `excluded` 部分
+3. 是否被排除规则误伤 → 查 `snapshot-YYYY-MM-DD.json` 的 `excluded` 部分
 
 **Q: 为什么榜上有一些我不认为是 Agent 的项目？**
 
-- 打开 `review-queue.md` 检查 `type=?` 或 `form=?` 的项目
+- 打开 `review-queue-YYYY-MM-DD.md` 检查 `type=?` 或 `form=?` 的项目
 - 修改 `exclude-patterns.json` 增加规则
 - 重跑
 

@@ -78,12 +78,12 @@ python3 search_agents.py --quiet
 
 默认输出到 `output/` 目录。
 
-- `ranking-active-top<N>.md`
-- `ranking-legacy-top<N>.md`
-- `ranking-all.csv`
-- `snapshot.json`
-- `metadata.json`
-- `review-queue.md`
+- `ranking-active-top<N>-YYYY-MM-DD.md`
+- `ranking-legacy-top<N>-YYYY-MM-DD.md`
+- `ranking-all-YYYY-MM-DD.csv`
+- `snapshot-YYYY-MM-DD.json`
+- `metadata-YYYY-MM-DD.json`
+- `review-queue-YYYY-MM-DD.md`
 
 补充说明：
 

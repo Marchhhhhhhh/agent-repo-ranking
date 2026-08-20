@@ -100,12 +100,12 @@ def build_url_opener() -> request.OpenerDirector:
     return opener
 
 
-def active_ranking_filename(top_n: int) -> str:
-    return f"ranking-active-top{top_n}.md"
+def active_ranking_filename(top_n: int, date_str: str) -> str:
+    return f"ranking-active-top{top_n}-{date_str}.md"
 
 
-def legacy_ranking_filename(top_n: int) -> str:
-    return f"ranking-legacy-top{top_n}.md"
+def legacy_ranking_filename(top_n: int, date_str: str) -> str:
+    return f"ranking-legacy-top{top_n}-{date_str}.md"
 
 
 # 全局 opener（在 main 中根据环境变量初始化）
@@ -1299,8 +1299,13 @@ def main() -> int:
     top_legacy = sort_by_stars(legacy_repos)[: args.legacy]
 
     snapshot = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    active_filename = active_ranking_filename(len(top_active))
-    legacy_filename = legacy_ranking_filename(len(top_legacy))
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    active_filename = active_ranking_filename(len(top_active), date_str)
+    legacy_filename = legacy_ranking_filename(len(top_legacy), date_str)
+    snapshot_filename = f"snapshot-{date_str}.json"
+    metadata_filename = f"metadata-{date_str}.json"
+    csv_filename = f"ranking-all-{date_str}.csv"
+    review_queue_filename = f"review-queue-{date_str}.md"
     if args.lang == "en":
         active_title = f"Active GitHub Agent Ecosystem Top {len(top_active)}"
         active_note = f"Filter: pushed within the last {ACTIVE_DAYS_THRESHOLD} days; ranked by stars"
@@ -1341,7 +1346,7 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    (out / "snapshot.json").write_text(
+    (out / snapshot_filename).write_text(
         json.dumps(
             {
                 "snapshot_date": snapshot,
@@ -1357,7 +1362,7 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    (out / "metadata.json").write_text(
+    (out / metadata_filename).write_text(
         json.dumps(
             {
                 "snapshot_date": snapshot,
@@ -1369,9 +1374,9 @@ def main() -> int:
                 "data_dir": str(args.data_dir),
                 "active_output": active_filename,
                 "legacy_output": legacy_filename,
-                "csv_output": "ranking-all.csv",
-                "snapshot_output": "snapshot.json",
-                "review_queue_output": "review-queue.md",
+                "csv_output": csv_filename,
+                "snapshot_output": snapshot_filename,
+                "review_queue_output": review_queue_filename,
             },
             indent=2,
             ensure_ascii=False,
@@ -1380,16 +1385,16 @@ def main() -> int:
     )
 
     # CSV
-    to_csv(repos, out / "ranking-all.csv")
+    to_csv(repos, out / csv_filename)
 
     # 人审队列
-    write_review_queue(sort_by_stars(repos)[: args.top + args.legacy], out / "review-queue.md", args.lang)
+    write_review_queue(sort_by_stars(repos)[: args.top + args.legacy], out / review_queue_filename, args.lang)
 
     print(f"\n✅ Done! Output directory / 完成！输出目录：{out}", file=sys.stderr)
     print(f"   · Active: {active_filename} ({len(top_active)} items / 项)", file=sys.stderr)
     print(f"   · Legacy: {legacy_filename} ({len(top_legacy)} items / 项)", file=sys.stderr)
-    print("   · Full data: snapshot.json / metadata.json / ranking-all.csv / 完整数据", file=sys.stderr)
-    print("   · Review queue: review-queue.md / 人审队列", file=sys.stderr)
+    print(f"   · Full data: {snapshot_filename} / {metadata_filename} / {csv_filename} / 完整数据", file=sys.stderr)
+    print(f"   · Review queue: {review_queue_filename} / 人审队列", file=sys.stderr)
     print(f"\n📅 Data snapshot / 数据快照: {snapshot}", file=sys.stderr)
     return 0
 
