@@ -9,12 +9,11 @@ allowed-tools: Bash, Read
 一个用于生成 "GitHub Agent 仓库排名报告" 的 Skill。  
 A skill for generating ranked snapshots of the GitHub agent ecosystem.
 
-产出三份榜单：  
-It produces three lists:
+产出两份榜单：  
+It produces two lists:
 
 - **主榜**：GitHub Agent 生态活跃 Top 50（近 6 个月有提交）
-- **副榜 1**：GitHub Agent 历史 Top 20（含已停维护，如 Auto-GPT）
-- **副榜 2**：闭源 Agent 产品 Top 10（Cursor、Manus、Devin 等，非 GitHub 榜）
+- **副榜**：GitHub Agent 历史 Top 20（含已停维护，如 Auto-GPT）
 
 ## 何时使用这个 Skill / When To Use This Skill
 
@@ -104,7 +103,6 @@ Output files are written to `output/` by default, or to `--output-dir` if provid
 | -------------------------------- | -------------------------- |
 | `ranking-active-top50.md`        | 主榜 · 人类可读 Markdown   |
 | `ranking-legacy-top20.md`        | 历史榜 · 补充生态演进脉络  |
-| `ranking-closed-source-top10.md` | 闭源榜 · 补齐生态版图      |
 | `ranking-all.csv`                | Excel 分析用，含 `desc_cn` / `desc_en` |
 | `snapshot.json`                  | 完整结构化数据             |
 | `metadata.json`                  | 本次跑批参数与输出文件索引 |
@@ -126,8 +124,8 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 
 三路合并去重后进入候选池，预计覆盖率 80-85%。
 
-### 三份榜单，不打架
-- 活跃榜按 star 排；历史榜宽松纳入 Auto-GPT 等；闭源榜单独处理
+### 两份榜单，不打架
+- 活跃榜按 star 排；历史榜宽松纳入 Auto-GPT 等
 - 每份榜单排序标准清晰、数据源明确
 
 ### 自动打标 + 人审兜底
@@ -142,13 +140,11 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 - **`keywords.json`** — 搜索关键词。新出流行词就加进来
 - **`seed-repos.json`** — Seed list。发现新 Agent 就加进 `product_agents` / `frameworks` / `middleware_and_tools` 三个数组之一
 - **`awesome-lists.json`** — Awesome 列表源。发现新的高质量列表就加
-- **`closed-source.json`** — 闭源产品清单。手动维护
 - **`exclude-patterns.json`** — 排除规则。发现误抓就加
 
 ### 维护建议 / Maintenance Tips
 
 - **每季度**过一遍 seed-repos.json，添加新出现的 Agent
-- **每次跑之前**看一眼 `closed-source.json` 里的数据是否需要更新
 - **每次跑之后**打开 `review-queue.md`，判断边界 case 是否要收录
 
 ## 已知局限 / Limitations
@@ -156,7 +152,6 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 **产品设计时明确不解决的问题**：
 
 - ❌ 只覆盖 GitHub（不含 GitLab / Gitee / 私有仓库）
-- ❌ 闭源产品数据靠公开信息估算（融资额、用户数可能有 30% 误差）
 - ❌ 覆盖率约 80-85%（长尾必然会漏）
 - ❌ 快照式数据（不呈现 star 增长速度）
 - ❌ 自动分类基于关键词，可能误判
@@ -177,7 +172,6 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 1. star 数是否 ≥ 100（默认下限）
 2. 是否有近 6 个月的 push（否则进历史榜）
 3. 是否被排除规则误伤 → 查 `snapshot.json` 的 `excluded` 部分
-4. 是否 GitHub 上根本没有仓库（如 Manus）→ 应该在 `closed-source.json` 里
 
 **Q: 为什么榜上有一些我不认为是 Agent 的项目？**
 

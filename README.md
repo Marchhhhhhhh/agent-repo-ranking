@@ -8,11 +8,10 @@
 
 Generate ranked snapshots of the GitHub agent ecosystem with reproducible filters, structured outputs, and review queues.
 
-It produces three lists:
+It produces two lists:
 
 - Active list: GitHub agent repositories with commits in the last 180 days
 - Legacy list: historically important but recently inactive GitHub agent repositories
-- Closed-source list: notable agent products where GitHub stars are not the main signal
 
 ## What It Does
 
@@ -81,7 +80,6 @@ By default, files are written to `output/`.
 
 - `ranking-active-top<N>.md`
 - `ranking-legacy-top<N>.md`
-- `ranking-closed-source-top10.md`
 - `ranking-all.csv`
 - `snapshot.json`
 - `metadata.json`
@@ -100,7 +98,6 @@ All configs live under `data/`.
 - `keywords.json`: search keywords
 - `seed-repos.json`: forced-include repo seeds
 - `awesome-lists.json`: Awesome lists used for discovery
-- `closed-source.json`: closed-source product list
 - `exclude-patterns.json`: exclusion rules
 
 ## Good For
@@ -118,7 +115,6 @@ This project is designed as a practical engineering workflow, not a perfect rese
 ## Limitations
 
 - Only covers public GitHub repositories
-- Closed-source rankings rely on public information and should be manually checked before formal use
 - Automatic classification is keyword and README based, so false positives are possible
 - Results are snapshots, not long-term trend analysis
 

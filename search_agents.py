@@ -2,15 +2,13 @@
 """
 GitHub Agent repository ranking generator.
 
-Collects Agent-related repositories from GitHub and generates three ranked outputs:
+Collects Agent-related repositories from GitHub and generates two ranked outputs:
   · Active Top N
   · Legacy Top N
-  · Closed-source Top 10 (from closed-source.json)
 
-依据 DESIGN.md 中的方法，从 GitHub 收集 Agent 相关仓库并生成三份榜单：
+依据 DESIGN.md 中的方法，从 GitHub 收集 Agent 相关仓库并生成两份榜单：
   · 主榜 · 活跃 Top N
-  · 副榜1 · 历史 Top N（含已停维护）
-  · 副榜2 · 闭源产品 Top 10（读 closed-source.json）
+  · 副榜 · 历史 Top N（含已停维护）
 
 Usage / 用法:
   python3 search_agents.py                          # Run with defaults / 用默认配置跑
@@ -328,7 +326,6 @@ def load_config(data_dir: Path) -> dict:
         "keywords": load_json(data_dir / "keywords.json"),
         "seed": load_json(data_dir / "seed-repos.json"),
         "awesome": load_json(data_dir / "awesome-lists.json"),
-        "closed_source": load_json(data_dir / "closed-source.json"),
         "exclude": load_json(data_dir / "exclude-patterns.json"),
     }
 
@@ -954,12 +951,6 @@ def output_text(lang: str) -> dict[str, str]:
             "form_col": "Form",
             "last_push_col": "Last Push",
             "descriptions_heading": "### One-line Descriptions",
-            "closed_title": "Closed-Source Agent Products Top 10",
-            "vendor_col": "Vendor",
-            "funding_col": "Funding",
-            "signal_col": "Signal",
-            "notes_col": "Notes",
-            "warning_label": "Warning",
             "review_title": "# Review Queue",
             "review_count_prefix": "There are",
             "review_count_suffix": "candidate repos that need manual review.",
@@ -981,12 +972,6 @@ def output_text(lang: str) -> dict[str, str]:
             "form_col": "Form / 形态",
             "last_push_col": "Last Push / 最近提交",
             "descriptions_heading": "### One-line Descriptions / 一句话描述",
-            "closed_title": "Closed-Source Agent Products Top 10 / 闭源 Agent 产品 Top 10",
-            "vendor_col": "Vendor / 厂商",
-            "funding_col": "Funding / 融资",
-            "signal_col": "Signal / 信号",
-            "notes_col": "Notes / 说明",
-            "warning_label": "Warning / 注意",
             "review_title": "# Review Queue / 人审队列",
             "review_count_prefix": "There are / 共",
             "review_count_suffix": "candidate repos that need manual review / 条候选记录需要人工判定。",
@@ -1007,12 +992,6 @@ def output_text(lang: str) -> dict[str, str]:
         "form_col": "形态",
         "last_push_col": "最近提交",
         "descriptions_heading": "### 一句话描述",
-        "closed_title": "副榜 2 · 闭源 Agent 产品 Top 10",
-        "vendor_col": "厂商",
-        "funding_col": "融资",
-        "signal_col": "信号",
-        "notes_col": "说明",
-        "warning_label": "注意",
         "review_title": "# 人审队列",
         "review_count_prefix": "共",
         "review_count_suffix": "条候选记录需要人工判定。",
@@ -1112,38 +1091,6 @@ def to_csv(repos: list[Repo], path: Path) -> None:
                     r.review_status,
                 ]
             )
-
-
-def to_closed_source_markdown(closed_source: dict, snapshot: str, lang: str) -> str:
-    t = output_text(lang)
-    note = closed_source.get("note", "")
-    snapshot_note = closed_source.get("snapshot_note", "")
-    if lang == "en":
-        note = "This list is ranked by overall market impact rather than GitHub stars. Figures are compiled from public information and should be manually checked."
-        snapshot_note = "The closed-source product section depends on public information and may be outdated. Please review before formal use."
-    elif lang == "bilingual":
-        note = f"{closed_source.get('note', '')} / This list is ranked by overall market impact rather than GitHub stars."
-        snapshot_note = (
-            f"{closed_source.get('snapshot_note', '')} / Please manually verify public-information fields before formal use."
-        )
-
-    lines = [f"# {t['closed_title']}", ""]
-    lines.append(f"> **{t['snapshot_label']}**: {snapshot}")
-    lines.append(f"> **{t['note_label']}**: {note}")
-    lines.append(f"> **{t['warning_label']}**: {snapshot_note}")
-    lines.append("")
-    lines.append(
-        f"| # | {t['project_col']} | {t['vendor_col']} | {t['form_col']} | {t['funding_col']} | {t['signal_col']} | {t['notes_col']} |"
-    )
-    lines.append("|---|---|---|---|---|---|---|")
-    for i, p in enumerate(closed_source.get("products", []), 1):
-        link = p["name"]
-        if p.get("website"):
-            link = f"[{p['name']}]({p['website']})"
-        lines.append(
-            f"| {i} | {link} | {p.get('vendor','-')} | {p.get('form','-')} | {p.get('funding','-')} | {p.get('user_signal','-')} | {p.get('note','')} |"
-        )
-    return "\n".join(lines)
 
 
 def write_review_queue(repos: list[Repo], path: Path, lang: str) -> None:
@@ -1334,12 +1281,6 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    (out / "ranking-closed-source-top10.md").write_text(
-        to_closed_source_markdown(cfg["closed_source"], snapshot, args.lang),
-        encoding="utf-8",
-    )
-
-    # 完整 JSON
     (out / "snapshot.json").write_text(
         json.dumps(
             {
@@ -1349,7 +1290,6 @@ def main() -> int:
                 "excluded": [{"key": k, "reason": r} for k, r in excluded],
                 "active_top": [asdict(r) for r in top_active],
                 "legacy_top": [asdict(r) for r in top_legacy],
-                "closed_source": cfg["closed_source"]["products"],
             },
             indent=2,
             ensure_ascii=False,
@@ -1369,7 +1309,6 @@ def main() -> int:
                 "data_dir": str(args.data_dir),
                 "active_output": active_filename,
                 "legacy_output": legacy_filename,
-                "closed_source_output": "ranking-closed-source-top10.md",
                 "csv_output": "ranking-all.csv",
                 "snapshot_output": "snapshot.json",
                 "review_queue_output": "review-queue.md",
@@ -1389,7 +1328,6 @@ def main() -> int:
     print(f"\n✅ Done! Output directory / 完成！输出目录：{out}", file=sys.stderr)
     print(f"   · Active: {active_filename} ({len(top_active)} items / 项)", file=sys.stderr)
     print(f"   · Legacy: {legacy_filename} ({len(top_legacy)} items / 项)", file=sys.stderr)
-    print("   · Closed-source: ranking-closed-source-top10.md / 闭源榜", file=sys.stderr)
     print("   · Full data: snapshot.json / metadata.json / ranking-all.csv / 完整数据", file=sys.stderr)
     print("   · Review queue: review-queue.md / 人审队列", file=sys.stderr)
     print(f"\n📅 Data snapshot / 数据快照: {snapshot}", file=sys.stderr)

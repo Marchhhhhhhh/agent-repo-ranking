@@ -28,7 +28,7 @@
 
 ## 2. 收录范围（边界定义）
 
-### 三份榜单
+### 两份榜单
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -38,16 +38,10 @@
 │    · 排序：star 数                                       │
 │    · 用途：告诉听众"社区当前在关注什么"                   │
 ├──────────────────────────────────────────────────────────┤
-│  副榜 1 · GitHub Agent 历史 Top 20（含已停维护）          │
+│  副榜 · GitHub Agent 历史 Top 20（含已停维护）            │
 │    · 与主榜同标准，但不过滤 pushed_at                    │
 │    · 标注活跃度（活跃 / 半活跃 / 停维护）                 │
 │    · 用途：讲历史脉络（Auto-GPT 等放这里）                │
-├──────────────────────────────────────────────────────────┤
-│  副榜 2 · 闭源 Agent 产品 Top 10（非 GitHub）             │
-│    · 收录：Cursor / Manus / Devin / Copilot 等           │
-│    · 排序：综合影响力（融资 / 用户数 / 声量）             │
-│    · 明确标注"数据来自公开信息，非官方口径"                │
-│    · 用途：补齐生态版图                                  │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -65,12 +59,6 @@
 - ❌ 通用 LLM 应用（除非核心能力是 Agent）
 - ❌ 已归档 / 已删除的仓库
 - ❌ Fork（除非 fork 已成为主流分支）
-
-### 副榜 2 收录标准
-
-至少满足以下之一：
-- 有官网 + 有付费用户 + 融资信息公开
-- 或有可信媒体报道 + 用户量估计
 
 ---
 
@@ -199,7 +187,6 @@ IF repo in known_agent_seed_list THEN 强制收录
 │    · keywords.json（关键词种子）                         │
 │    · seed-repos.json（强制收录清单）                     │
 │    · awesome-lists.json（Awesome 列表 URL）             │
-│    · closed-source.json（闭源产品清单）                  │
 ├─────────────────────────────────────────────────────────┤
 │  Step 2 · 多路发现（并行）                                │
 │    · 路径 A：关键词搜索 GitHub Search API                │
@@ -223,7 +210,6 @@ IF repo in known_agent_seed_list THEN 强制收录
 │  Step 6 · 生成榜单                                       │
 │    · 按 pushed_at 分主榜 / 历史榜                        │
 │    · 按 star 排序取 Top 50 / Top 20                     │
-│    · 合并闭源榜（从 closed-source.json 读）              │
 ├─────────────────────────────────────────────────────────┤
 │  Step 7 · 输出                                          │
 │    · JSON（结构化，供后续处理）                          │
@@ -271,7 +257,6 @@ output/
 ├── snapshot-2026-07-14.json           # 完整数据
 ├── ranking-active-top50.md            # 主榜 · 人类可读
 ├── ranking-legacy-top20.md            # 历史榜 · 人类可读
-├── ranking-closed-source-top10.md     # 闭源榜
 ├── ranking-all.csv                    # Excel 用
 ├── review-queue.md                    # 需人审的边界 case
 └── metadata.json                      # 快照日期、跑批参数、总耗时
@@ -286,7 +271,6 @@ output/
 ### 6.1 数据源局限
 - **只覆盖 GitHub**：GitLab、Gitee、私有仓库不在范围
 - **只用公开 API**：GitHub 的"trending"内部算法闭源，无法完全复现
-- **闭源产品数据靠估算**：用户数、融资额可能有 30% 误差
 
 ### 6.2 时间性局限
 - **快照式数据**：不呈现 star 增长速度（除非跑两次 diff）
@@ -311,7 +295,6 @@ output/
 如果你要把结果放进分享材料、文章或周报，可以按下面的结构组织：
 - 一页或一节展示活跃榜前 10-20
 - 一页或一节展示历史榜，补充生态演进脉络
-- 一页或一节展示闭源榜，补齐 GitHub 之外的产品版图
 
 ### 呈现方式建议
 
@@ -329,7 +312,6 @@ output/
 - [ ] `skills/agent-repo-ranking/data/keywords.json`
 - [ ] `skills/agent-repo-ranking/data/seed-repos.json`
 - [ ] `skills/agent-repo-ranking/data/awesome-lists.json`
-- [ ] `skills/agent-repo-ranking/data/closed-source.json`
 - [ ] `skills/agent-repo-ranking/data/exclude-patterns.json`
 - [ ] 提供一次真实跑通的完整输出样例
 

@@ -8,11 +8,10 @@
 
 一个用于生成 GitHub Agent 生态排名快照的轻量工具，强调可复跑、可解释、可维护。
 
-它会输出三份榜单：
+它会输出两份榜单：
 
 - 活跃榜：近 180 天有提交的 GitHub Agent 仓库
 - 历史榜：曾有影响力但近期不活跃的 GitHub Agent 仓库
-- 闭源榜：不以 GitHub star 为核心指标的闭源 Agent 产品
 
 ## 这个项目做什么
 
@@ -81,7 +80,6 @@ python3 search_agents.py --quiet
 
 - `ranking-active-top<N>.md`
 - `ranking-legacy-top<N>.md`
-- `ranking-closed-source-top10.md`
 - `ranking-all.csv`
 - `snapshot.json`
 - `metadata.json`
@@ -100,7 +98,6 @@ python3 search_agents.py --quiet
 - `keywords.json`：搜索关键词
 - `seed-repos.json`：强制收录的已知仓库
 - `awesome-lists.json`：用于发现候选仓库的 Awesome 列表
-- `closed-source.json`：闭源产品清单
 - `exclude-patterns.json`：排除规则
 
 ## 适用场景
@@ -118,7 +115,6 @@ python3 search_agents.py --quiet
 ## 已知局限
 
 - 只覆盖 GitHub 公开仓库
-- 闭源榜依赖公开资料整理，正式引用前应人工复核
 - 自动分类基于关键词和 README，存在误判可能
 - 数据是快照，不代表长期趋势
 
