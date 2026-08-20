@@ -322,9 +322,18 @@ def load_json(path: Path) -> dict:
 
 
 def load_config(data_dir: Path) -> dict:
+    seed_cfg = load_json(data_dir / "seed-repos.json")
+    seed_type_map: dict[str, str] = {}
+    for name in seed_cfg.get("product_agents", []):
+        seed_type_map[name.lower()] = "Product"
+    for name in seed_cfg.get("frameworks", []):
+        seed_type_map[name.lower()] = "Framework"
+    for name in seed_cfg.get("middleware_and_tools", []):
+        seed_type_map[name.lower()] = "Middleware"
     return {
         "keywords": load_json(data_dir / "keywords.json"),
-        "seed": load_json(data_dir / "seed-repos.json"),
+        "seed": seed_cfg,
+        "seed_type_map": seed_type_map,
         "awesome": load_json(data_dir / "awesome-lists.json"),
         "exclude": load_json(data_dir / "exclude-patterns.json"),
     }
@@ -643,12 +652,57 @@ TOPIC_FORM_MAP = {
 }
 
 
-def classify(repo: Repo, readme: str = "") -> None:
-    """基于 description + readme + topics 打标签"""
-    text = (repo.description + " " + (readme[:2000] if readme else "")).lower()
+def web_search_summary(query: str, timeout: int = 10) -> str:
+    """通过 DuckDuckGo lite 搜索获取前几条结果摘要。零依赖，纯 urllib。"""
+    try:
+        url = "https://lite.duckduckgo.com/lite/"
+        data = parse.urlencode({"q": query}).encode("utf-8")
+        req = request.Request(
+            url,
+            data=data,
+            method="POST",
+            headers={
+                "User-Agent": USER_AGENT,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+        )
+        with _OPENER.open(req, timeout=timeout) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+            snippets = []
+            for m in re.finditer(r'<td[^>]*class="result-snippet"[^>]*>(.*?)</td>', html, re.S):
+                snippet = re.sub(r'<[^>]+>', '', m.group(1)).strip()
+                if snippet:
+                    snippets.append(snippet)
+            return " ".join(snippets[:3])
+    except Exception:
+        return ""
+
+
+def classify(repo: Repo, seed_type_map: dict[str, str] | None = None, use_search: bool = False) -> None:
+    """基于 description + topics + seed list + 可选联网搜索打标签"""
+    text = repo.description.lower()
     topics = [t.lower() for t in (repo.topics or [])]
 
-    # 类型：先用文本规则，未命中再看 topics
+    # 最高优先级：seed-repos.json 精确覆盖
+    if seed_type_map and repo.full_name.lower() in seed_type_map:
+        repo.type = seed_type_map[repo.full_name.lower()]
+        # form 仍尝试从 topics / desc 推断
+        matched_form = None
+        for f, keywords in FORM_RULES.items():
+            if any(kw in text for kw in keywords):
+                matched_form = f
+                break
+        if not matched_form:
+            for tp in topics:
+                if tp in TOPIC_FORM_MAP:
+                    matched_form = TOPIC_FORM_MAP[tp]
+                    break
+        repo.form = matched_form
+        repo.review_status = "auto"
+        return
+
+    # 类型：保守关键词匹配 + topics fallback
     matched_type = None
     for t, keywords in TYPE_RULES.items():
         if any(kw in text for kw in keywords):
@@ -661,7 +715,7 @@ def classify(repo: Repo, readme: str = "") -> None:
                 break
     repo.type = matched_type or "?"
 
-    # 形态：先用文本规则，未命中再看 topics
+    # 形态：desc 关键词 + topics fallback
     matched_form = None
     for f, keywords in FORM_RULES.items():
         if any(kw in text for kw in keywords):
@@ -674,13 +728,31 @@ def classify(repo: Repo, readme: str = "") -> None:
                 break
     repo.form = matched_form
 
-    # 附加 tag
+    # 对高 star 且未命中的项目，用联网搜索辅助
+    if use_search and repo.type == "?" and repo.stars > 1000:
+        search_text = web_search_summary(f"site:github.com {repo.full_name} what is")
+        if search_text:
+            search_lower = search_text.lower()
+            # 用搜索结果重新走一遍 TYPE_RULES
+            for t, keywords in TYPE_RULES.items():
+                if any(kw in search_lower for kw in keywords):
+                    repo.type = t
+                    break
+            # form 同理
+            if repo.form is None:
+                for f, keywords in FORM_RULES.items():
+                    if any(kw in search_lower for kw in keywords):
+                        repo.form = f
+                        break
+
+    # 附加 tag（基于 description 而非 readme，避免噪声）
     tags = []
-    if "coding" in text or "code" in text:
+    desc_lower = repo.description.lower()
+    if "coding" in desc_lower or "code" in desc_lower:
         tags.append("coding")
-    if "browser" in text:
+    if "browser" in desc_lower:
         tags.append("browser")
-    if "chinese" in text or "中文" in text or "chinese" in repo.description.lower():
+    if "chinese" in desc_lower or "中文" in desc_lower:
         tags.append("cn")
     if repo.language:
         tags.append(f"lang:{repo.language.lower()}")
@@ -1208,22 +1280,10 @@ def main() -> int:
     print("🧹 [Step 5/6] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
     repos = [normalize(r) for r in kept]
 
-    # 5. Tagging (README fetch only for top N) / 打标（README 读取只对 Top N 项目做）
-    if not args.skip_readme:
-        top_for_readme = sorted(repos, key=lambda r: -r.stars)[: max(args.top, args.legacy) + 20]
-        for i, r in enumerate(top_for_readme):
-            if i % 10 == 0:
-                print(f"  📖 Reading README {i+1}/{len(top_for_readme)}... / 读 README {i+1}/{len(top_for_readme)}...", file=sys.stderr)
-            readme = gh.get_readme(r.full_name)
-            r.readme_excerpt = readme[:500] if readme else ""
-            classify(r, readme)
-        # Tag the rest using description only / 其他项目只用 description 打
-        for r in repos:
-            if not r.readme_excerpt:
-                classify(r)
-    else:
-        for r in repos:
-            classify(r)
+    # 5. Tagging / 打标（不再读取 README，避免噪声）
+    seed_type_map = cfg.get("seed_type_map", {})
+    for r in repos:
+        classify(r, seed_type_map=seed_type_map, use_search=False)
 
     # Generate one-line descriptions / 生成一句话描述
     for r in repos:
