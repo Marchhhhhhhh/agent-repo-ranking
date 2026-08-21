@@ -61,8 +61,8 @@ python3 search_agents.py --top 30
 # 历史榜取前 15
 python3 search_agents.py --legacy 15
 
-# 跳过 README 抓取
-python3 search_agents.py --skip-readme
+# 跳过联网搜索分类（更快，但标签质量下降）
+python3 search_agents.py --skip-search
 
 # 指定输出目录
 python3 search_agents.py --output-dir /tmp/agent-report

@@ -81,8 +81,8 @@ Expected runtime:
 # 只取主榜前 30
 python3 search_agents.py --top 30
 
-# 跳过 README 读取（更快，但类型标签质量降）
-python3 search_agents.py --skip-readme
+# 跳过联网搜索分类（更快，但类型/形态标签质量下降）
+python3 search_agents.py --skip-search
 
 # 自定义输出目录
 python3 search_agents.py --output-dir /tmp/agent-report
@@ -129,7 +129,8 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 - 每份榜单排序标准清晰、数据源明确
 
 ### 自动打标 + 人审兜底
-- 15 个关键词打形态标签（CLI、IDE-plugin、AI-IDE、Web-Builder 等）
+- 上榜仓库并发联网搜索（子线程），用搜索摘要判定类型/形态标签（CLI、IDE-plugin、AI-IDE、Web-Builder 等）
+- 搜索后端：优先 Brave Search API（配 `BRAVE_API_KEY`，稳定），降级 DuckDuckGo（无 key）
 - 为上榜项目生成中英双语一句话描述
 - 打不上标签的进入 `review-queue-YYYY-MM-DD.md` 等人工判定
 

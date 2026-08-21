@@ -61,8 +61,8 @@ python3 search_agents.py --top 30
 # Generate top 15 legacy repos
 python3 search_agents.py --legacy 15
 
-# Skip README fetching
-python3 search_agents.py --skip-readme
+# Skip web-search classification (faster, lower label quality)
+python3 search_agents.py --skip-search
 
 # Set a custom output directory
 python3 search_agents.py --output-dir /tmp/agent-report
