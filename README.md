@@ -8,10 +8,11 @@
 
 Generate ranked snapshots of the GitHub agent ecosystem with reproducible filters, structured outputs, and review queues.
 
-It produces two lists:
+It produces three lists:
 
 - Active list: GitHub agent repositories with commits in the last 180 days
 - Legacy list: historically important but recently inactive GitHub agent repositories
+- Products list: only repos classified as Product (end-user agent products, no frameworks/middleware)
 
 ## What It Does
 
@@ -77,6 +78,7 @@ By default, files are written to `output/`.
 
 - `ranking-active-top<N>-YYYY-MM-DD.md`
 - `ranking-legacy-top<N>-YYYY-MM-DD.md`
+- `ranking-products-top<N>-YYYY-MM-DD.md`
 - `ranking-all-YYYY-MM-DD.csv`
 - `snapshot-YYYY-MM-DD.json`
 - `metadata-YYYY-MM-DD.json`

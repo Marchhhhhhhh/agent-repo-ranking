@@ -9,11 +9,12 @@ allowed-tools: Bash, Read
 一个用于生成 "GitHub Agent 仓库排名报告" 的 Skill。  
 A skill for generating ranked snapshots of the GitHub agent ecosystem.
 
-产出两份榜单：  
-It produces two lists:
+产出三份榜单：  
+It produces three lists:
 
 - **主榜**：GitHub Agent 生态活跃 Top 50（近 6 个月有提交）
-- **副榜**：GitHub Agent 历史 Top 20（含已停维护，如 Auto-GPT）
+- **副榜 1**：GitHub Agent 历史 Top 20（含已停维护，如 Auto-GPT）
+- **副榜 2**：GitHub Agent 纯产品 Top 50（仅 type=Product 的终端可用产品，不含框架/中间件）
 
 ## 何时使用这个 Skill / When To Use This Skill
 
@@ -72,8 +73,19 @@ python3 search_agents.py
 
 预计耗时：  
 Expected runtime:
-- 有 token：2-5 分钟
+- 有 token：**2-5 分钟**
 - 无 token：30-60 分钟（会触发限流频繁休眠）
+
+> **为什么这么久？/ Why does it take so long?**
+> 一次跑批需要 **2000+ 次 GitHub API 调用**：15 个关键词 × 3 页搜索（search 限流 30 次/分钟）+ 每个候选仓库 1 次元数据请求（core 限流 5000 次/小时）+ Awesome 列表抽取。
+> **耗时由 GitHub API 限流决定，不是脚本卡死**——日志会持续滚动打印进度，请耐心等待。
+> One run needs 2000+ GitHub API calls (15 keywords × 3 pages of search, rate-limited at 30/min, plus one metadata request per candidate repo at 5000/hour). The runtime is dictated by GitHub's rate limits, not a hang — logs keep printing progress, please be patient.
+>
+> **网络提示 / Network tip**：中国大陆直连可能出现 SSL 断连重试，建议先设置代理再跑：
+> Direct connections from mainland China may hit SSL errors; set a proxy first:
+> ```bash
+> export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890
+> ```
 
 ### 常用选项 / Common Options
 
@@ -100,6 +112,7 @@ Output files are written to `output/` by default, or to `--output-dir` if provid
 | -------------------------------- | -------------------------- |
 | `ranking-active-top50-YYYY-MM-DD.md`        | 主榜 · 人类可读 Markdown   |
 | `ranking-legacy-top20-YYYY-MM-DD.md`        | 历史榜 · 补充生态演进脉络  |
+| `ranking-products-top50-YYYY-MM-DD.md`      | 产品榜 · 仅 type=Product 的纯 Agent 产品 |
 | `ranking-all-YYYY-MM-DD.csv`                | Excel 分析用，含 `desc_cn` / `desc_en` |
 | `snapshot-YYYY-MM-DD.json`                  | 完整结构化数据             |
 | `metadata-YYYY-MM-DD.json`                  | 本次跑批参数与输出文件索引 |
@@ -121,8 +134,8 @@ Markdown files include `CN / EN` one-line summaries for each ranked project.
 
 三路合并去重后进入候选池，预计覆盖率 80-85%。
 
-### 两份榜单，不打架
-- 活跃榜按 star 排；历史榜宽松纳入 Auto-GPT 等
+### 三份榜单，不打架
+- 活跃榜按 star 排；历史榜宽松纳入 Auto-GPT 等；产品榜只留 type=Product 的终端产品
 - 每份榜单排序标准清晰、数据源明确
 
 ### 自动打标 + AI 审核兜底

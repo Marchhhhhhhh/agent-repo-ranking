@@ -107,6 +107,10 @@ def legacy_ranking_filename(top_n: int, date_str: str) -> str:
     return f"ranking-legacy-top{top_n}-{date_str}.md"
 
 
+def product_ranking_filename(top_n: int, date_str: str) -> str:
+    return f"ranking-products-top{top_n}-{date_str}.md"
+
+
 # 全局 opener（在 main 中根据环境变量初始化）
 _OPENER: request.OpenerDirector = request.build_opener()
 
@@ -1239,11 +1243,13 @@ def main() -> int:
 
     top_active = sort_by_stars(active_repos)[: args.top]
     top_legacy = sort_by_stars(legacy_repos)[: args.legacy]
+    top_products = sort_by_stars([r for r in repos if r.type == "Product"])[: args.top]
 
     snapshot = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     active_filename = active_ranking_filename(len(top_active), date_str)
     legacy_filename = legacy_ranking_filename(len(top_legacy), date_str)
+    products_filename = product_ranking_filename(len(top_products), date_str)
     snapshot_filename = f"snapshot-{date_str}.json"
     metadata_filename = f"metadata-{date_str}.json"
     csv_filename = f"ranking-all-{date_str}.csv"
@@ -1253,16 +1259,22 @@ def main() -> int:
         active_note = f"Filter: pushed within the last {ACTIVE_DAYS_THRESHOLD} days; ranked by stars"
         legacy_title = f"Legacy GitHub Agent Ecosystem Top {len(top_legacy)}"
         legacy_note = f"Only includes repos with no push activity for more than {ACTIVE_DAYS_THRESHOLD} days"
+        products_title = f"GitHub Agent Products Top {len(top_products)}"
+        products_note = "Only repos classified as Product (end-user agent products); ranked by stars"
     elif args.lang == "bilingual":
         active_title = f"主榜 · GitHub Agent 生态活跃 Top {len(top_active)} / Active GitHub Agent Ecosystem Top {len(top_active)}"
         active_note = f"过滤条件：最近 {ACTIVE_DAYS_THRESHOLD} 天内有 push；按 star 排序 / Filter: pushed within the last {ACTIVE_DAYS_THRESHOLD} days; ranked by stars"
         legacy_title = f"副榜 1 · GitHub Agent 历史 Top {len(top_legacy)}（含已停维护） / Legacy GitHub Agent Ecosystem Top {len(top_legacy)}"
         legacy_note = f"仅保留 pushed_at 已超过 {ACTIVE_DAYS_THRESHOLD} 天的仓库 / Only includes repos with no push activity for more than {ACTIVE_DAYS_THRESHOLD} days"
+        products_title = f"副榜 2 · GitHub Agent 纯产品 Top {len(top_products)} / GitHub Agent Products Top {len(top_products)}"
+        products_note = f"仅收录 type=Product 的终端可用 Agent 产品（不含框架/中间件）；按 star 排序 / Only repos classified as Product (end-user agent products, no frameworks/middleware); ranked by stars"
     else:
         active_title = f"主榜 · GitHub Agent 生态活跃 Top {len(top_active)}"
         active_note = f"过滤条件：最近 {ACTIVE_DAYS_THRESHOLD} 天内有 push；按 star 排序"
         legacy_title = f"副榜 1 · GitHub Agent 历史 Top {len(top_legacy)}（含已停维护）"
         legacy_note = f"仅保留 pushed_at 已超过 {ACTIVE_DAYS_THRESHOLD} 天的仓库"
+        products_title = f"副榜 2 · GitHub Agent 纯产品 Top {len(top_products)}"
+        products_note = "仅收录 type=Product 的终端可用 Agent 产品（不含框架/中间件）；按 star 排序"
 
     # 输出
     out = args.output_dir
@@ -1288,6 +1300,17 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    (out / products_filename).write_text(
+        to_markdown_table(
+            top_products,
+            products_title,
+            products_note,
+            snapshot,
+            args.lang,
+        ),
+        encoding="utf-8",
+    )
+
     (out / snapshot_filename).write_text(
         json.dumps(
             {
@@ -1297,6 +1320,7 @@ def main() -> int:
                 "excluded": [{"key": k, "reason": r} for k, r in excluded],
                 "active_top": [asdict(r) for r in top_active],
                 "legacy_top": [asdict(r) for r in top_legacy],
+                "products_top": [asdict(r) for r in top_products],
             },
             indent=2,
             ensure_ascii=False,
@@ -1315,6 +1339,7 @@ def main() -> int:
                 "data_dir": str(args.data_dir),
                 "active_output": active_filename,
                 "legacy_output": legacy_filename,
+                "products_output": products_filename,
                 "csv_output": csv_filename,
                 "snapshot_output": snapshot_filename,
                 "review_queue_output": review_queue_filename,
@@ -1334,6 +1359,7 @@ def main() -> int:
     print(f"\n✅ Done! Output directory / 完成！输出目录：{out}", file=sys.stderr)
     print(f"   · Active: {active_filename} ({len(top_active)} items / 项)", file=sys.stderr)
     print(f"   · Legacy: {legacy_filename} ({len(top_legacy)} items / 项)", file=sys.stderr)
+    print(f"   · Products: {products_filename} ({len(top_products)} items / 项)", file=sys.stderr)
     print(f"   · Full data: {snapshot_filename} / {metadata_filename} / {csv_filename} / 完整数据", file=sys.stderr)
     print(f"   · Review queue: {review_queue_filename} / 人审队列", file=sys.stderr)
     print(f"\n📅 Data snapshot / 数据快照: {snapshot}", file=sys.stderr)

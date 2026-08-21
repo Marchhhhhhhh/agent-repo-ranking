@@ -8,10 +8,11 @@
 
 一个用于生成 GitHub Agent 生态排名快照的轻量工具，强调可复跑、可解释、可维护。
 
-它会输出两份榜单：
+它会输出三份榜单：
 
 - 活跃榜：近 180 天有提交的 GitHub Agent 仓库
 - 历史榜：曾有影响力但近期不活跃的 GitHub Agent 仓库
+- 产品榜：仅 type=Product 的终端可用 Agent 产品（不含框架/中间件）
 
 ## 这个项目做什么
 
@@ -77,6 +78,7 @@ python3 search_agents.py --quiet
 
 - `ranking-active-top<N>-YYYY-MM-DD.md`
 - `ranking-legacy-top<N>-YYYY-MM-DD.md`
+- `ranking-products-top<N>-YYYY-MM-DD.md`
 - `ranking-all-YYYY-MM-DD.csv`
 - `snapshot-YYYY-MM-DD.json`
 - `metadata-YYYY-MM-DD.json`
