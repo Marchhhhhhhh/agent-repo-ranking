@@ -13,7 +13,6 @@ Collects Agent-related repositories from GitHub and generates two ranked outputs
 Usage / 用法:
   python3 search_agents.py                          # Run with defaults / 用默认配置跑
   python3 search_agents.py --top 30 --legacy 15     # Customize ranking sizes / 自定义榜长
-  python3 search_agents.py --skip-search            # Skip web-search classification / 跳过联网搜索分类
   python3 search_agents.py --output-dir out/        # Set output directory / 自定义输出目录
   python3 search_agents.py --lang en                # Output in English / 输出英文文案
 
@@ -322,11 +321,14 @@ def load_json(path: Path) -> dict:
 
 
 def load_config(data_dir: Path) -> dict:
+    overrides_raw = load_json(data_dir / "type-overrides.json")
     return {
         "keywords": load_json(data_dir / "keywords.json"),
         "seed": load_json(data_dir / "seed-repos.json"),
         "awesome": load_json(data_dir / "awesome-lists.json"),
         "exclude": load_json(data_dir / "exclude-patterns.json"),
+        # AI/人工确认的类型映射，key 统一转小写便于匹配
+        "type_overrides": {k.lower(): v for k, v in overrides_raw.get("overrides", {}).items()},
     }
 
 
@@ -643,70 +645,6 @@ TOPIC_FORM_MAP = {
 }
 
 
-def _search_via_brave(query: str, api_key: str, timeout: int = 10) -> str:
-    """Brave Search API（稳定，需要免费 API key，每月 2000 次额度）"""
-    import gzip
-
-    url = "https://api.search.brave.com/res/v1/web/search?" + parse.urlencode({"q": query, "count": 5})
-    req = request.Request(
-        url,
-        headers={
-            "Accept": "application/json",
-            "Accept-Encoding": "gzip",
-            "X-Subscription-Token": api_key,
-        },
-    )
-    with _OPENER.open(req, timeout=timeout) as resp:
-        raw = resp.read()
-        if resp.headers.get("Content-Encoding") == "gzip":
-            raw = gzip.decompress(raw)
-        data = json.loads(raw.decode("utf-8", errors="ignore"))
-        snippets = [
-            r.get("description", "").strip()
-            for r in (data.get("web", {}).get("results") or [])
-            if r.get("description")
-        ]
-        return " ".join(snippets[:3])
-
-
-def _search_via_duckduckgo(query: str, timeout: int = 10) -> str:
-    """DuckDuckGo lite（无需 key，但可能被反爬降级，失败返回空）"""
-    url = "https://lite.duckduckgo.com/lite/?" + parse.urlencode({"q": query})
-    req = request.Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-    )
-    with _OPENER.open(req, timeout=timeout) as resp:
-        html = resp.read().decode("utf-8", errors="ignore")
-        snippets = []
-        # 注意：DuckDuckGo lite 使用单引号 class='result-snippet'
-        for m in re.finditer(r"<td[^>]*class=['\"]result-snippet['\"][^>]*>(.*?)</td>", html, re.S):
-            snippet = re.sub(r"<[^>]+>", "", m.group(1)).strip()
-            if snippet:
-                snippets.append(snippet)
-        return " ".join(snippets[:3])
-
-
-def web_search_summary(query: str, timeout: int = 10) -> str:
-    """联网搜索仓库信息，返回前几条结果摘要。零第三方依赖，纯 urllib。
-
-    后端优先级：
-      1. Brave Search API（需 BRAVE_API_KEY，稳定）—— https://brave.com/search/api/ 免费注册
-      2. DuckDuckGo lite（无 key，尽力而为，可能被反爬）
-    失败或无结果返回空字符串（调用方回退到 description/topics 分类）。
-    """
-    brave_key = os.environ.get("BRAVE_API_KEY")
-    try:
-        if brave_key:
-            return _search_via_brave(query, brave_key, timeout)
-        return _search_via_duckduckgo(query, timeout)
-    except Exception:
-        return ""
-
-
 def _match_type_form(text: str, topics: list[str]) -> tuple[str, str | None]:
     """在给定文本 + topics 上执行 TYPE_RULES / FORM_RULES 匹配"""
     matched_type = None
@@ -734,27 +672,22 @@ def _match_type_form(text: str, topics: list[str]) -> tuple[str, str | None]:
     return matched_type or "?", matched_form
 
 
-def classify(repo: Repo, search_text: str = "") -> None:
-    """打标签：优先用联网搜索摘要，回退到 GitHub description + topics。
+def classify(repo: Repo, overrides: dict[str, Any] | None = None) -> None:
+    """打标签：data/type-overrides.json（AI/人工确认）最高优先级，description + topics 兜底。
 
-    分类依据优先级：
-      1. search_text（联网搜索摘要，通常是最准确的第三方描述）
-      2. repo.description + topics（仓库自报信息，可信度较低，仅兜底）
+    工作流：跑批产出 review-queue 后，由运行 skill 的 AI 用自带的联网搜索能力
+    逐个确认 type=? 的仓库，把结论写进 data/type-overrides.json，重跑即生效。
     """
     topics = [t.lower() for t in (repo.topics or [])]
 
-    # 1. 优先：搜索摘要
-    if search_text:
-        t, f = _match_type_form(search_text.lower(), topics)
-        repo.type, repo.form = t, f
-
-    # 2. 兜底：description + topics（搜索缺失或未命中时）
-    if repo.type == "?" or repo.form is None:
-        desc_type, desc_form = _match_type_form(repo.description.lower(), topics)
-        if repo.type == "?":
-            repo.type = desc_type
-        if repo.form is None:
-            repo.form = desc_form
+    # 1. 最高优先级：overrides（AI/人工确认过的映射）
+    if overrides and repo.full_name.lower() in overrides:
+        entry = overrides[repo.full_name.lower()]
+        repo.type = entry.get("type") or "?"
+        repo.form = entry.get("form")
+    else:
+        # 2. 兜底：description + topics（仓库自报信息，可信度较低）
+        repo.type, repo.form = _match_type_form(repo.description.lower(), topics)
 
     # 附加 tag（基于 description，避免噪声）
     tags = []
@@ -772,34 +705,6 @@ def classify(repo: Repo, search_text: str = "") -> None:
     # review 标记
     if repo.type == "?" or repo.form is None:
         repo.review_status = "needs_review"
-
-
-def classify_with_search(repos: list[Repo], verbose: bool = True, max_workers: int = 5) -> None:
-    """对上榜仓库并发发起联网搜索，用搜索摘要分类（子线程方式）。
-
-    每个仓库一个搜索请求：query = "github.com/{full_name}"
-    并发数默认 5，避免触发 DuckDuckGo 限流。
-    """
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
-    def _log(msg: str) -> None:
-        if verbose:
-            print(msg, file=sys.stderr)
-
-    total = len(repos)
-
-    def _search_one(repo: Repo) -> tuple[Repo, str]:
-        return repo, web_search_summary(f"github.com/{repo.full_name}")
-
-    done = 0
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(_search_one, r): r for r in repos}
-        for future in as_completed(futures):
-            repo, search_text = future.result()
-            classify(repo, search_text=search_text)
-            done += 1
-            if done % 10 == 0 or done == total:
-                _log(f"  🌐 Web-search classify {done}/{total}... / 联网搜索分类 {done}/{total}...")
 
 
 # ---------------------------------------------------------------------------
@@ -1233,7 +1138,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--top", type=int, default=50, help="Active ranking size / 主榜取多少项（默认 50）")
     parser.add_argument("--legacy", type=int, default=20, help="Legacy ranking size / 历史榜取多少项（默认 20）")
-    parser.add_argument("--skip-search", action="store_true", help="Skip web-search-based classification / 跳过联网搜索分类（更快，但标签质量下降）")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="Output directory / 输出目录")
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR, help="Config directory / 配置文件目录")
     parser.add_argument("--lang", choices=["zh", "en", "bilingual"], default="bilingual", help="Output language / 输出语言：zh / en / bilingual")
@@ -1319,14 +1223,9 @@ def main() -> int:
     print("🧹 [Step 5/6] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
     repos = [normalize(r) for r in kept]
 
-    # 5. Tagging / 打标
-    # 先用 description + topics 给全部候选打底分类（快速、零网络）
+    # 5. Tagging / 打标（type-overrides.json 优先，description/topics 兜底）
     for r in repos:
-        classify(r)
-    # 再对上榜仓库并发联网搜索，用搜索摘要精修分类（子线程）
-    if not args.skip_search:
-        top_for_search = sorted(repos, key=lambda r: -r.stars)[: args.top + args.legacy]
-        classify_with_search(top_for_search, verbose=verbose)
+        classify(r, overrides=cfg.get("type_overrides"))
 
     # Generate one-line descriptions / 生成一句话描述
     for r in repos:
@@ -1411,7 +1310,6 @@ def main() -> int:
                 "snapshot_date": snapshot,
                 "top": args.top,
                 "legacy": args.legacy,
-                "skip_search": args.skip_search,
                 "lang": args.lang,
                 "output_dir": str(out),
                 "data_dir": str(args.data_dir),

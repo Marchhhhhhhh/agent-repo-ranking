@@ -61,9 +61,6 @@ python3 search_agents.py --top 30
 # Generate top 15 legacy repos
 python3 search_agents.py --legacy 15
 
-# Skip web-search classification (faster, lower label quality)
-python3 search_agents.py --skip-search
-
 # Set a custom output directory
 python3 search_agents.py --output-dir /tmp/agent-report
 
@@ -99,6 +96,7 @@ All configs live under `data/`.
 - `seed-repos.json`: forced-include repo seeds
 - `awesome-lists.json`: Awesome lists used for discovery
 - `exclude-patterns.json`: exclusion rules
+- `type-overrides.json`: AI/human-confirmed type mapping (highest classification priority)
 
 ## Good For
 

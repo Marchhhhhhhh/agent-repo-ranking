@@ -61,9 +61,6 @@ python3 search_agents.py --top 30
 # 历史榜取前 15
 python3 search_agents.py --legacy 15
 
-# 跳过联网搜索分类（更快，但标签质量下降）
-python3 search_agents.py --skip-search
-
 # 指定输出目录
 python3 search_agents.py --output-dir /tmp/agent-report
 
@@ -99,6 +96,7 @@ python3 search_agents.py --quiet
 - `seed-repos.json`：强制收录的已知仓库
 - `awesome-lists.json`：用于发现候选仓库的 Awesome 列表
 - `exclude-patterns.json`：排除规则
+- `type-overrides.json`：AI/人工确认的类型映射（分类最高优先级）
 
 ## 适用场景
 

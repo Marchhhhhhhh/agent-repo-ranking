@@ -1,0 +1,32 @@
+{
+  "description": "人工/AI 确认的仓库类型映射，分类时优先级最高。用法：跑完脚本后，由运行 skill 的 AI 逐个确认 review-queue 中 type=? 的仓库（用 AI 自带的联网搜索能力），把结果补充到这里，重跑即生效。",
+  "note": "type 可选值: Product / Framework / Middleware；form 可选值: CLI / IDE-plugin / AI-IDE / Web-Builder / Cloud-General / Multi-Agent-Framework / Browser-Agent / MCP-Ecosystem / Self-Hosted，拿不准可留 null。非 Agent 项目不要写在这里，应加入 exclude-patterns.json。",
+  "overrides": {
+    "openclaw/openclaw": { "type": "Product", "form": null },
+    "obra/superpowers": { "type": "Framework", "form": null },
+    "mattpocock/skills": { "type": "Middleware", "form": null },
+    "anomalyco/opencode": { "type": "Product", "form": "CLI" },
+    "anthropics/skills": { "type": "Middleware", "form": null },
+    "langflow-ai/langflow": { "type": "Product", "form": "Self-Hosted" },
+    "langgenius/dify": { "type": "Product", "form": "Self-Hosted" },
+    "open-webui/open-webui": { "type": "Product", "form": "Self-Hosted" },
+    "msitarzewski/agency-agents": { "type": "Middleware", "form": null },
+    "google-gemini/gemini-cli": { "type": "Product", "form": "CLI" },
+    "OpenHands/OpenHands": { "type": "Product", "form": "CLI" },
+    "All-Hands-AI/OpenHands": { "type": "Product", "form": "CLI" },
+    "openinterpreter/openinterpreter": { "type": "Product", "form": "CLI" },
+    "TauricResearch/TradingAgents": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "infiniflow/ragflow": { "type": "Product", "form": "Self-Hosted" },
+    "bytedance/deer-flow": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "earendil-works/pi": { "type": "Product", "form": "CLI" },
+    "ruvnet/ruflo": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "code-yeongyu/oh-my-openagent": { "type": "Product", "form": "CLI" },
+    "karpathy/autoresearch": { "type": "Product", "form": null },
+    "paperclipai/paperclip": { "type": "Product", "form": "Self-Hosted" },
+    "addyosmani/agent-skills": { "type": "Middleware", "form": null },
+    "Leonxlnx/taste-skill": { "type": "Middleware", "form": null },
+    "colbymchenry/codegraph": { "type": "Middleware", "form": null },
+    "DietrichGebert/ponytail": { "type": "Middleware", "form": null },
+    "github/spec-kit": { "type": "Framework", "form": null }
+  }
+}
