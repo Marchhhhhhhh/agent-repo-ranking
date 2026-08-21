@@ -66,7 +66,9 @@
     "hiyouga/LlamaFactory",
     "thedaviddias/Front-End-Checklist",
     "ansible/ansible",
-    "D4Vinci/Scrapling"
+    "D4Vinci/Scrapling",
+    "unslothai/unsloth",
+    "datawhalechina/hello-agents"
   ],
   "soft_exclude_description_keywords": [
     "wallpaper",
