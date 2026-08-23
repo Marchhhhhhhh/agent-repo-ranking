@@ -763,6 +763,57 @@ CN_DESC_OVERRIDES = {
     "livekit/agents": "实时语音/多模态 Agent 构建框架",
     "khoj-ai/khoj": "可自托管的个人 AI 第二大脑与助手",
     "openbmb/xagent": "自主解决复杂任务的开源 Agent",
+    "openclaw/openclaw": "开源个人 AI 助手，任意系统与平台均可部署（OpenClaw）",
+    "nousresearch/hermes-agent": "Nous Research 出品的可自我成长的 Agent",
+    "nextlevelbuilder/ui-ux-pro-max-skill": "为 AI 编码工具注入专业 UI/UX 设计智能的技能包",
+    "earendil-works/pi": "一体化 Agent 工具箱：统一 LLM API、Agent 循环、TUI 与编码 CLI",
+    "karpathy/autoresearch": "Karpathy 出品：AI Agent 自动执行单 GPU nanochat 训练研究",
+    "egonex-ai/understand-anything": "把任意代码变成可探索、可检索、可问答的交互式知识图谱",
+    "paperclipai/paperclip": "开源的团队 Agent 管理应用",
+    "openbb-finance/openbb": "面向分析师、量化交易与 AI Agent 的开源金融数据平台",
+    "code-yeongyu/oh-my-openagent": "面向复杂代码库的编码 Agent 工具集（支持 Codex / OpenCode）",
+    "openinterpreter/openinterpreter": "面向开源模型（Kimi K3 等）的编码 Agent",
+    "santifer/career-ops": "开源 AI 求职助手：扫描职位、结构化评分、定制简历、跟踪投递",
+    "fission-ai/openspec": "面向 AI 编码助手的规格驱动开发（SDD）框架",
+    "mintplex-labs/anything-llm": "本地优先的个人 AI 工作站，支持文档问答与 Agent 应用",
+    "warpdotdev/warp": "从终端进化而来的 Agent 化开发环境",
+    "aaif-goose/goose": "开源可扩展的 AI Agent CLI：安装、执行、编辑、测试一体",
+    "cherryhq/cherry-studio": "多模型 AI 工作台：智能对话、自主 Agent 与 300+ 助手",
+    "stablyai/orca": "并行调度成群编码 Agent 的 Agent 开发环境（ADE）",
+    "calesthio/openmontage": "开源 Agent 化视频生产系统：12 条管线、100+ 工具",
+    "hkuds/cli-anything": "让所有软件 Agent 原生化的 CLI 中心",
+    "chatboxai/chatbox": "跨平台桌面 AI 客户端，支持多家模型服务",
+    "copilotkit/copilotkit": "面向 Agent 与生成式 UI 的前端框架（AG-UI 协议出品方）",
+    "agentscope-ai/qwenpaw": "易装易部署的个人 AI 助手，本地/云端皆可，支持多聊天应用接入",
+    "tabbyml/tabby": "可自托管的 AI 编码助手（代码补全）",
+    "pythagora-io/gpt-pilot": "从需求到成品全程自主开发的 AI 开发者（GPT Pilot）",
+    "zeroclaw-labs/zeroclaw": "轻量快速的自主个人 AI 助手基础设施，任意平台可部署",
+    "iofficeai/officecli": "为 AI Agent 打造的 Office 命令行套件：读写并自动化 Word/Excel/PPT",
+    "qwenlm/qwen-code": "阿里 Qwen 团队出品的终端编码 Agent",
+    "rohitg00/agentmemory": "基于真实基准评测的编码 Agent 持久化记忆方案",
+    "kilo-org/kilocode": "一体化 Agent 化工程平台，内置热门开源编码 Agent",
+    "othmanadi/planning-with-files": "为编码 Agent 提供基于文件的持久化规划，防崩溃、可恢复",
+    "decolua/9router": "免费 AI 编码路由：40+ 渠道接入 Claude/GPT/Gemini，自动降级切换",
+    "mksglu/context-mode": "编码 Agent 上下文优化：沙箱化工具输出、持久会话记忆、智能路由",
+    "stitionai/devika": "开源 Agentic 软件工程师，Devin 的开源替代",
+    "leon-ai/leon": "开源个人 AI 助手，本地部署保护隐私",
+    "larksuite/cli": "飞书官方 CLI：覆盖 IM/文档/表格/日历等，内置 200+ 命令与 Agent 技能",
+    "open-metadata/openmetadata": "面向数据与 AI 的开源元数据平台，为人和 Agent 提供可信数据上下文",
+    "obra/superpowers": "实用的 Agent 技能框架与软件开发方法论",
+    "mattpocock/skills": "工程师向的 Agent 技能合集（.agents 目录直出）",
+    "anthropics/skills": "Anthropic 官方 Agent Skills 公共仓库",
+    "msitarzewski/agency-agents": "一整套 AI 代理公司 Agent 合集：各司其职的专家型 Agent",
+    "github/spec-kit": "GitHub 官方规格驱动开发（Spec-Driven Development）工具包",
+    "farion1231/cc-switch": "跨平台桌面工具：一站式切换管理 Claude Code、Codex、OpenCode 等编码 Agent",
+    "graphify-labs/graphify": "把代码库、文档、SQL、PDF 变成可查询知识图谱的编码 Agent 技能",
+    "dietrichgebert/ponytail": "让 AI Agent 像最懒资深工程师一样思考：能不写的代码就不写",
+    "thedotmack/claude-mem": "为编码 Agent 提供跨会话持久记忆，自动压缩并注入历史上下文",
+    "koala73/worldmonitor": "实时全球情报仪表盘：AI 新闻聚合与地缘政治监控",
+    "leonxlnx/taste-skill": "提升 AI 审美的技能包，避免生成千篇一律的内容",
+    "shareai-lab/learn-claude-code": "从 0 到 1 构建的迷你 Claude Code 式 Agent 框架教学项目",
+    "panniantong/agent-reach": "给 AI Agent 装上眼睛：一个 CLI 读取全网内容，零 API 费用",
+    "daytonaio/daytona": "运行 AI 生成代码的安全弹性沙箱基础设施",
+    "colbymchenry/codegraph": "本地预索引代码知识图谱，随代码变更自动同步，为编码 Agent 省 token",
 }
 
 EN_DESC_OVERRIDES = {
@@ -846,6 +897,19 @@ def clean_desc_text(text: str) -> str:
     return cleaned.strip()
 
 
+FORM_CN_LABELS = {
+    "IDE-plugin": "Agent IDE 插件",
+    "AI-IDE": "AI 原生 IDE",
+    "CLI": "命令行 Agent 工具",
+    "Web-Builder": "网页搭建 Agent",
+    "Cloud-General": "云端通用 Agent",
+    "Multi-Agent-Framework": "多 Agent 框架",
+    "Browser-Agent": "浏览器 Agent",
+    "MCP-Ecosystem": "MCP 生态项目",
+    "Self-Hosted": "可自托管项目",
+}
+
+
 def make_cn_desc(repo: Repo) -> str:
     """为仓库生成一句话中文描述。
 
@@ -896,8 +960,12 @@ def make_cn_desc(repo: Repo) -> str:
     if summary:
         return f"{summary}（{cleaned}）"
 
-    # 兜底：直接保留英文原文
-    return cleaned
+    # 兜底：按 form/type 生成中文概括前缀，保留英文原文作参考。
+    # 不再直接返回英文原文，避免中文榜单出现整句英文描述。
+    form_cn = FORM_CN_LABELS.get(repo.form or "")
+    if form_cn:
+        return f"{form_cn}（{cleaned}）"
+    return f"Agent 相关项目（{cleaned}）"
 
 
 TYPE_EN_LABELS = {
