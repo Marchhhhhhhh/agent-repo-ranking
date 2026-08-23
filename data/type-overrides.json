@@ -32,6 +32,27 @@
     "anthropics/claude-code": { "type": "Product", "form": "CLI" },
     "browser-use/browser-use": { "type": "Product", "form": "Browser-Agent" },
     "modelcontextprotocol/servers": { "type": "Middleware", "form": "MCP-Ecosystem" },
-    "NousResearch/hermes-agent": { "type": "Product", "form": null }
+    "NousResearch/hermes-agent": { "type": "Product", "form": null },
+    "cline/cline": { "type": "Product", "form": "IDE-plugin" },
+    "RooCodeInc/Roo-Code": { "type": "Product", "form": "IDE-plugin" },
+    "langchain-ai/langchain": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "microsoft/autogen": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "crewAIInc/crewAI": { "type": "Framework", "form": "Multi-Agent-Framework" },
+    "AntonOsika/gpt-engineer": { "type": "Product", "form": "CLI" },
+    "mem0ai/mem0": { "type": "Middleware", "form": null },
+    "thedotmack/claude-mem": { "type": "Middleware", "form": null },
+    "daytonaio/daytona": { "type": "Middleware", "form": null },
+    "shareAI-lab/learn-claude-code": { "type": "Framework", "form": null },
+    "Fission-AI/OpenSpec": { "type": "Product", "form": "CLI" },
+    "Mintplex-Labs/anything-llm": { "type": "Product", "form": "Self-Hosted" },
+    "warpdotdev/warp": { "type": "Product", "form": "CLI" },
+    "CherryHQ/cherry-studio": { "type": "Product", "form": "Self-Hosted" },
+    "stablyai/orca": { "type": "Product", "form": "CLI" },
+    "santifer/career-ops": { "type": "Product", "form": "CLI" },
+    "OpenBB-finance/OpenBB": { "type": "Product", "form": null },
+    "Egonex-AI/Understand-Anything": { "type": "Product", "form": null },
+    "mvanhorn/last30days-skill": { "type": "Middleware", "form": null },
+    "Aider-AI/aider": { "type": "Product", "form": "CLI" },
+    "HKUDS/CLI-Anything": { "type": "Product", "form": "CLI" }
   }
 }

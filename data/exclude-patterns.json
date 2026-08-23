@@ -68,7 +68,14 @@
     "ansible/ansible",
     "D4Vinci/Scrapling",
     "unslothai/unsloth",
-    "datawhalechina/hello-agents"
+    "datawhalechina/hello-agents",
+    "ultraworkers/claw-code",
+    "shanraisshan/claude-code-best-practice",
+    "asgeirtj/system_prompts_leaks",
+    "tldraw/tldraw",
+    "ZhuLinsen/daily_stock_analysis",
+    "huginn/huginn",
+    "hugohe3/ppt-master"
   ],
   "soft_exclude_description_keywords": [
     "wallpaper",

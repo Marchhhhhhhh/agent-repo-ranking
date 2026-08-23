@@ -32,6 +32,7 @@ import sys
 import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
+from http.client import IncompleteRead
 from pathlib import Path
 from typing import Any
 from urllib import request, error, parse
@@ -267,7 +268,7 @@ class GitHubClient:
                 self._log(f"  ⚠️  404: {path}")
                 return {}
             raise
-        except (error.URLError, TimeoutError, OSError) as e:
+        except (error.URLError, TimeoutError, OSError, IncompleteRead) as e:
             if _retries >= 3:
                 self._log(f"  ⚠️  network error on {path}: {e}. Retried {_retries} times, giving up / 已重试 {_retries} 次，放弃")
                 return {}
@@ -706,8 +707,8 @@ def classify(repo: Repo, overrides: dict[str, Any] | None = None) -> None:
         tags.append(f"lang:{repo.language.lower()}")
     repo.auto_tags = tags
 
-    # review 标记
-    if repo.type == "?" or repo.form is None:
+    # review 标记 — 仅当 type 未知时才需要审查，form 可选不强制
+    if repo.type == "?":
         repo.review_status = "needs_review"
 
 
