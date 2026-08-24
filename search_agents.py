@@ -1203,6 +1203,166 @@ def write_review_queue(repos: list[Repo], path: Path, lang: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# 核验阶段：对入榜仓库做一致性检查
+# ---------------------------------------------------------------------------
+
+# 描述/名称中暗示 "skill / plugin / tutorial / list" 而非独立产品的信号
+SKILL_LIKE_TEXT = [
+    "a skill for", "an ai skill for", "skills for",
+    "plugin for", "extension for",
+    "snippet", "tutorial", "cheat sheet",
+    "best practice", "template for",
+    "boilerplate", "starter kit", "example of",
+]
+
+# 描述/名称中暗示 "framework / library / sdk" 的信号
+FRAMEWORK_LIKE_TEXT = [
+    "framework for", "framework to", "sdk for", "library for",
+    "toolkit for", "toolkit:", "package for", "module for",
+    "build your own", "build agents", "building agents",
+]
+
+# 仓库名中含这些后缀/关键词时，高度疑似 skill 而非独立产品
+SKILL_NAME_SUFFIXES = ["-skill", "-skills", "-plugin", "-snippet", "-template"]
+
+
+@dataclass
+class VerificationIssue:
+    repo: str
+    stars: int
+    severity: str  # "warn" / "info"
+    category: str
+    detail: str
+    suggestion: str
+
+
+def verify_rankings(
+    top_active: list[Repo],
+    top_legacy: list[Repo],
+    top_products: list[Repo],
+    all_repos: list[Repo],
+    overrides: dict[str, Any],
+) -> list[VerificationIssue]:
+    """对入榜仓库做一致性核验，返回可疑条目列表。"""
+    issues: list[VerificationIssue] = []
+    override_keys = {k.lower() for k in overrides}
+
+    def add(repo: Repo, severity: str, category: str, detail: str, suggestion: str):
+        issues.append(VerificationIssue(
+            repo=repo.full_name, stars=repo.stars,
+            severity=severity, category=category,
+            detail=detail, suggestion=suggestion,
+        ))
+
+    for r in top_products:
+        key = r.full_name.lower()
+        desc = (r.description or "").lower()
+        name = r.name.lower()
+        topics = [t.lower() for t in r.topics]
+        has_override = key in override_keys
+
+        # 1. 仓库名含 skill/plugin 后缀（如 xxx-skill、xxx-skills），高度疑似非独立产品
+        if any(name.endswith(sfx) for sfx in SKILL_NAME_SUFFIXES) and not has_override:
+            add(r, "warn", "skill-name-suffix",
+                f"仓库名含 skill/plugin 后缀（{name}），可能不是独立 Agent 产品",
+                f"考虑改为 Middleware 或加入 type-overrides.json 确认")
+
+        # 2. 描述明确自称 "a skill for / an ai skill for / plugin for / extension for"
+        if any(kw in desc for kw in SKILL_LIKE_TEXT) and not has_override:
+            add(r, "warn", "skill-like-as-product",
+                f"描述含插件/技能/教程类自称关键词，但分类为 Product",
+                f"考虑改为 Middleware 或加入 type-overrides.json 确认")
+
+        # 3. 描述含 framework/sdk/toolkit 但分类为 Product
+        if any(kw in desc for kw in FRAMEWORK_LIKE_TEXT) and not has_override:
+            add(r, "warn", "framework-as-product",
+                f"描述含框架/SDK 类关键词，但分类为 Product",
+                f"考虑改为 Framework 或加入 type-overrides.json 确认")
+
+        # 4. auto-classified（非 override）的 Product 且无 agent 相关关键词
+        if not has_override:
+            agent_keywords = {"agent", "assistant", "copilot", "autonomous", "agentic"}
+            desc_name_haystack = f"{desc} {name}"
+            if not any(kw in desc_name_haystack for kw in agent_keywords):
+                # topics 里也没有强 agent 信号
+                agent_topics = {"agent", "agents", "ai-agent", "ai-agents", "copilot",
+                                "coding-agent", "coding-assistant", "autonomous-agent"}
+                if not (agent_topics & set(topics)):
+                    add(r, "warn", "weak-agent-signal",
+                        f"自动分类为 Product，但名称/描述/topics 中均无明显 Agent 关键词",
+                        f"建议人工确认是否为真正的 Agent 产品")
+
+    # 5. 高 star 但非 override 的新仓库（创建 < 1 年），可能存在刷星嫌疑
+    now = datetime.now(timezone.utc)
+    for r in top_active[:50]:
+        created = parse_iso_datetime(r.created_at)
+        if created and not (r.full_name.lower() in override_keys):
+            age_days = (now - created).days
+            if age_days < 365 and r.stars > 50_000:
+                add(r, "info", "new-high-star",
+                    f"创建仅 {age_days} 天却有 {r.stars:,} stars，数据可能异常",
+                    f"建议核实 star 数是否合理")
+
+    # 6. 榜单中同 owner 出现 3+ 个仓库（可能是组织批量刷榜）
+    all_ranked = top_active + top_legacy + top_products
+    owner_counts: dict[str, list[str]] = {}
+    for r in all_ranked:
+        owner_counts.setdefault(r.owner.lower(), []).append(r.full_name)
+    for owner, repos_list in owner_counts.items():
+        if len(repos_list) >= 3:
+            for r in all_ranked:
+                if r.owner.lower() == owner:
+                    add(r, "info", "owner-multi-repo",
+                        f"同 owner '{owner}' 有 {len(repos_list)} 个仓库入榜: {', '.join(repos_list)}",
+                        f"确认是否为正常的多项目组织")
+
+    return issues
+
+
+def write_verification_report(
+    issues: list[VerificationIssue],
+    path: Path,
+    snapshot: str,
+    lang: str,
+) -> None:
+    """输出核验报告到 Markdown 文件。"""
+    warns = [i for i in issues if i.severity == "warn"]
+    infos = [i for i in issues if i.severity == "info"]
+
+    lines = ["# 核验报告 / Verification Report", ""]
+    lines.append(f"> **数据快照 / Data Snapshot**: {snapshot}")
+    lines.append(f"> **警告 / Warnings**: {len(warns)}  |  **提示 / Info**: {len(infos)}")
+    lines.append("")
+
+    if not issues:
+        lines.append("✅ 未发现可疑条目 / No issues found.")
+        path.write_text("\n".join(lines), encoding="utf-8")
+        return
+
+    if warns:
+        lines.append("## ⚠️ 需要关注 / Warnings")
+        lines.append("")
+        for i, issue in enumerate(warns, 1):
+            lines.append(f"### {i}. [{issue.repo}](https://github.com/{issue.repo})  ({issue.stars:,}★)")
+            lines.append(f"- **类别 / Category**: `{issue.category}`")
+            lines.append(f"- **问题 / Detail**: {issue.detail}")
+            lines.append(f"- **建议 / Suggestion**: {issue.suggestion}")
+            lines.append("")
+
+    if infos:
+        lines.append("## ℹ️ 仅供参考 / Info")
+        lines.append("")
+        for i, issue in enumerate(infos, 1):
+            lines.append(f"### {i}. [{issue.repo}](https://github.com/{issue.repo})  ({issue.stars:,}★)")
+            lines.append(f"- **类别 / Category**: `{issue.category}`")
+            lines.append(f"- **说明 / Detail**: {issue.detail}")
+            lines.append(f"- **建议 / Suggestion**: {issue.suggestion}")
+            lines.append("")
+
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
 
@@ -1262,10 +1422,10 @@ def main() -> int:
     cfg = load_config(args.data_dir)
 
     # 2. Three discovery paths / 三路发现
-    print("🔎 [Step 1/6] Keyword search / 关键词搜索发现...", file=sys.stderr)
+    print("🔎 [Step 1/7] Keyword search / 关键词搜索发现...", file=sys.stderr)
     pool = discover_via_keywords(gh, cfg["keywords"]["keywords"])
 
-    print("📋 [Step 2/6] Seed list / Seed list 强制收录...", file=sys.stderr)
+    print("📋 [Step 2/7] Seed list / Seed list 强制收录...", file=sys.stderr)
     seed_pool = discover_via_seed(gh, cfg["seed"])
     seed_keys = set(seed_pool.keys())
     for key, data in seed_pool.items():
@@ -1274,14 +1434,14 @@ def main() -> int:
         else:
             pool[key] = data
 
-    print("📚 [Step 3/6] Awesome lists / Awesome 列表抽取...", file=sys.stderr)
+    print("📚 [Step 3/7] Awesome lists / Awesome 列表抽取...", file=sys.stderr)
     awesome_urls = discover_via_awesome(gh, cfg["awesome"])
     enrich_awesome_urls(gh, awesome_urls, pool)
 
     print(f"✅ Candidate pool: {len(pool)} repos / 候选池共 {len(pool)} 个仓库", file=sys.stderr)
 
     # 3. Filtering / 过滤
-    print("🚫 [Step 4/6] Apply exclusion rules / 应用排除规则...", file=sys.stderr)
+    print("🚫 [Step 4/7] Apply exclusion rules / 应用排除规则...", file=sys.stderr)
     kept: list[dict] = []
     excluded = []
     for key, raw in pool.items():
@@ -1293,7 +1453,7 @@ def main() -> int:
     print(f"  → Kept {len(kept)}, excluded {len(excluded)} / 保留 {len(kept)} 个，排除 {len(excluded)} 个", file=sys.stderr)
 
     # 4. Normalize / 归一化
-    print("🧹 [Step 5/6] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
+    print("🧹 [Step 5/7] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
     repos = [normalize(r) for r in kept]
 
     # 5. Tagging / 打标（type-overrides.json 优先，description/topics 兜底）
@@ -1306,7 +1466,7 @@ def main() -> int:
         r.desc_en = make_en_desc(r)
 
     # 6. Generate rankings / 生成榜单
-    print("📊 [Step 6/6] Generate rankings / 生成榜单...", file=sys.stderr)
+    print("📊 [Step 6/7] Generate rankings / 生成榜单...", file=sys.stderr)
     active_repos = [r for r in repos if r.is_active]
     legacy_repos = [r for r in repos if not r.is_active]
 
@@ -1323,6 +1483,7 @@ def main() -> int:
     metadata_filename = f"metadata-{date_str}.json"
     csv_filename = f"ranking-all-{date_str}.csv"
     review_queue_filename = f"review-queue-{date_str}.md"
+    verify_filename = f"verification-{date_str}.md"
     if args.lang == "en":
         active_title = f"Active GitHub Agent Ecosystem Top {len(top_active)}"
         active_note = f"Filter: pushed within the last {ACTIVE_DAYS_THRESHOLD} days; ranked by stars"
@@ -1412,6 +1573,7 @@ def main() -> int:
                 "csv_output": csv_filename,
                 "snapshot_output": snapshot_filename,
                 "review_queue_output": review_queue_filename,
+                "verification_output": verify_filename,
             },
             indent=2,
             ensure_ascii=False,
@@ -1425,12 +1587,26 @@ def main() -> int:
     # 人审队列
     write_review_queue(sort_by_stars(repos)[: args.top + args.legacy], out / review_queue_filename, args.lang)
 
+    # 7. Verification / 核验
+    print("🔍 [Step 7/7] Verify rankings / 核验榜单...", file=sys.stderr)
+    verify_issues = verify_rankings(
+        top_active, top_legacy, top_products, repos, cfg.get("type_overrides", {}),
+    )
+    write_verification_report(verify_issues, out / verify_filename, snapshot, args.lang)
+    warn_count = sum(1 for i in verify_issues if i.severity == "warn")
+    info_count = sum(1 for i in verify_issues if i.severity == "info")
+    if warn_count:
+        print(f"  ⚠️  {warn_count} warnings / {warn_count} 条警告，{info_count} info / {info_count} 条提示 → {verify_filename}", file=sys.stderr)
+    else:
+        print(f"  ✅ No warnings. {info_count} info notes / 无警告，{info_count} 条提示 → {verify_filename}", file=sys.stderr)
+
     print(f"\n✅ Done! Output directory / 完成！输出目录：{out}", file=sys.stderr)
     print(f"   · Active: {active_filename} ({len(top_active)} items / 项)", file=sys.stderr)
     print(f"   · Legacy: {legacy_filename} ({len(top_legacy)} items / 项)", file=sys.stderr)
     print(f"   · Products: {products_filename} ({len(top_products)} items / 项)", file=sys.stderr)
     print(f"   · Full data: {snapshot_filename} / {metadata_filename} / {csv_filename} / 完整数据", file=sys.stderr)
     print(f"   · Review queue: {review_queue_filename} / 人审队列", file=sys.stderr)
+    print(f"   · Verification: {verify_filename} / 核验报告", file=sys.stderr)
     print(f"\n📅 Data snapshot / 数据快照: {snapshot}", file=sys.stderr)
     return 0
 

@@ -53,6 +53,7 @@
     "Egonex-AI/Understand-Anything": { "type": "Product", "form": null },
     "mvanhorn/last30days-skill": { "type": "Middleware", "form": null },
     "Aider-AI/aider": { "type": "Product", "form": "CLI" },
-    "HKUDS/CLI-Anything": { "type": "Product", "form": "CLI" }
+    "HKUDS/CLI-Anything": { "type": "Product", "form": "CLI" },
+    "nextlevelbuilder/ui-ux-pro-max-skill": { "type": "Middleware", "form": null }
   }
 }
