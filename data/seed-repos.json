@@ -13,6 +13,7 @@
     "cheshire-cat-ai/core",
     "openai/codex",
     "anthropics/claude-code",
+    "deepseek-ai/deepseek-harness",
     "block/goose",
     "TabbyML/tabby",
     "twinnydotdev/twinny",

@@ -17,5 +17,26 @@
     "mcp",
     "model-context-protocol"
   ],
-  "note": "GitHub Search API 对 q 参数支持复杂查询。这里保持简单，每个关键词单独搜索。如需缩窄，可加 language:python 等限定。"
+  "topics": [
+    "ai-agents",
+    "agents",
+    "agent",
+    "ai-agent",
+    "llm-agent",
+    "autonomous-agent",
+    "autonomous-agents",
+    "agentic",
+    "agentic-ai",
+    "multi-agent",
+    "coding-agent",
+    "coding-assistant",
+    "browser-agent",
+    "browser-use",
+    "agent-framework",
+    "llm-agents",
+    "copilot",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "note": "GitHub Search API 对 q 参数支持复杂查询。topics 列表用于基于 GitHub Topics 标签的发现路径，专门捕获 topics 中含 agent 相关标签但名称/描述不含 agent 关键词的仓库。"
 }

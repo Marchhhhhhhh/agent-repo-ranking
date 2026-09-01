@@ -327,8 +327,10 @@ def load_json(path: Path) -> dict:
 
 def load_config(data_dir: Path) -> dict:
     overrides_raw = load_json(data_dir / "type-overrides.json")
+    keywords_data = load_json(data_dir / "keywords.json")
     return {
-        "keywords": load_json(data_dir / "keywords.json"),
+        "keywords": keywords_data,
+        "topics": keywords_data.get("topics", []),
         "seed": load_json(data_dir / "seed-repos.json"),
         "awesome": load_json(data_dir / "awesome-lists.json"),
         "exclude": load_json(data_dir / "exclude-patterns.json"),
@@ -376,6 +378,28 @@ def discover_via_seed(gh: GitHubClient, seed_config: dict) -> dict[str, dict]:
             data["_sources"] = ["seed-list"]
             pool[key] = data
     gh._log(f"    → Got metadata for {len(pool)} seed repos / 拿到 {len(pool)} 个 seed 仓库元数据")
+    return pool
+
+
+def discover_via_topics(gh: GitHubClient, topics: list[str], min_stars: int = 100) -> dict[str, dict]:
+    """路径 D：基于 GitHub Topics 搜索仓库。
+
+    使用 GitHub Search API 的 topic: 限定符，按 star 排序。
+    专门捕获那些 topics 中包含 agent 相关标签、但名称/描述不含 agent 关键词的仓库。
+    """
+    pool: dict[str, dict] = {}
+    for topic in topics:
+        query = f"topic:{topic} stars:>={min_stars}"
+        gh._log(f"  🏷️  Searching topic / 搜索话题：'{topic}'")
+        items = gh.search_repos(query, max_results=MAX_PER_KEYWORD)
+        for it in items:
+            key = it["full_name"].lower()
+            if key in pool:
+                pool[key].setdefault("_sources", []).append(f"topic:{topic}")
+            else:
+                it["_sources"] = [f"topic:{topic}"]
+                pool[key] = it
+        gh._log(f"    → Accumulated {len(pool)} unique repos / 累计 {len(pool)} 个不重复仓库")
     return pool
 
 
@@ -739,6 +763,7 @@ CN_DESC_OVERRIDES = {
     "aider-ai/aider": "终端里的 AI 结对编程工具，直接改本地 Git 仓库",
     "openai/codex": "OpenAI 的命令行编码 Agent（Codex CLI）",
     "anthropics/claude-code": "Anthropic 官方命令行编码 Agent（Claude Code）",
+    "deepseek-ai/deepseek-harness": "DeepSeek 出品的开源 Agent 框架，一切皆插件的架构设计",
     "sst/opencode": "开源的终端编码 Agent",
     "anomalyco/opencode": "开源的终端编码 Agent",
     "block/goose": "Block 出品的可扩展本地 AI Agent",
@@ -838,6 +863,7 @@ EN_DESC_OVERRIDES = {
     "aider-ai/aider": "A terminal-based AI pair programming tool that edits your local Git repo.",
     "openai/codex": "OpenAI's command-line coding agent experience.",
     "anthropics/claude-code": "Anthropic's official command-line coding agent.",
+    "deepseek-ai/deepseek-harness": "DeepSeek's open-source agent harness built on an everything-is-a-plugin architecture.",
     "sst/opencode": "An open-source coding agent for the terminal.",
     "anomalyco/opencode": "An open-source coding agent for the terminal.",
     "block/goose": "A locally extensible AI agent from Block.",
@@ -1095,21 +1121,37 @@ def output_text(lang: str) -> dict[str, str]:
     }
 
 
-def to_markdown_table(repos: list[Repo], title: str, note: str, snapshot: str, lang: str) -> str:
+def to_markdown_table(repos: list[Repo], title: str, note: str, snapshot: str, lang: str, show_type: bool = True, show_form: bool = True) -> str:
     t = output_text(lang)
     lines = [f"# {title}", ""]
     lines.append(f"> **{t['snapshot_label']}**: {snapshot}")
     lines.append(f"> **{t['note_label']}**: {note}")
     lines.append("")
-    lines.append(
-        f"| # | {t['project_col']} | Stars | Forks | {t['type_col']} | {t['form_col']} | Language | License | {t['last_push_col']} |"
-    )
-    lines.append("|---|---|---|---|---|---|---|---|---|")
+
+    # Build header and separator based on which columns to show
+    header_parts = ["#", t['project_col'], "Stars", "Forks"]
+    separator_parts = ["---", "---", "---", "---"]
+    if show_type:
+        header_parts.append(t['type_col'])
+        separator_parts.append("---")
+    if show_form:
+        header_parts.append(t['form_col'])
+        separator_parts.append("---")
+    header_parts.extend(["Language", "License", t['last_push_col']])
+    separator_parts.extend(["---", "---", "---"])
+
+    lines.append("| " + " | ".join(header_parts) + " |")
+    lines.append("|" + "|".join(separator_parts) + "|")
+
     for i, r in enumerate(repos, 1):
         link = f"[{r.full_name}]({r.url})"
-        lines.append(
-            f"| {i} | {link} | {r.stars:,} | {r.forks:,} | {r.type} | {r.form or '?'} | {r.language or '-'} | {r.license or '-'} | {format_pushed(r.pushed_at)} |"
-        )
+        row_parts = [str(i), link, f"{r.stars:,}", f"{r.forks:,}"]
+        if show_type:
+            row_parts.append(r.type)
+        if show_form:
+            row_parts.append(r.form or '?')
+        row_parts.extend([r.language or '-', r.license or '-', format_pushed(r.pushed_at)])
+        lines.append("| " + " | ".join(row_parts) + " |")
     lines.append("")
     lines.append("---")
     if lang == "bilingual":
@@ -1422,10 +1464,18 @@ def main() -> int:
     cfg = load_config(args.data_dir)
 
     # 2. Three discovery paths / 三路发现
-    print("🔎 [Step 1/7] Keyword search / 关键词搜索发现...", file=sys.stderr)
+    print("🔎 [Step 1/8] Keyword search / 关键词搜索发现...", file=sys.stderr)
     pool = discover_via_keywords(gh, cfg["keywords"]["keywords"])
 
-    print("📋 [Step 2/7] Seed list / Seed list 强制收录...", file=sys.stderr)
+    print("🏷️  [Step 2/8] Topic search / 话题标签发现...", file=sys.stderr)
+    topic_pool = discover_via_topics(gh, cfg["topics"])
+    for key, data in topic_pool.items():
+        if key in pool:
+            pool[key].setdefault("_sources", []).extend(data.get("_sources", []))
+        else:
+            pool[key] = data
+
+    print("📋 [Step 3/8] Seed list / Seed list 强制收录...", file=sys.stderr)
     seed_pool = discover_via_seed(gh, cfg["seed"])
     seed_keys = set(seed_pool.keys())
     for key, data in seed_pool.items():
@@ -1434,14 +1484,14 @@ def main() -> int:
         else:
             pool[key] = data
 
-    print("📚 [Step 3/7] Awesome lists / Awesome 列表抽取...", file=sys.stderr)
+    print("📚 [Step 4/8] Awesome lists / Awesome 列表抽取...", file=sys.stderr)
     awesome_urls = discover_via_awesome(gh, cfg["awesome"])
     enrich_awesome_urls(gh, awesome_urls, pool)
 
     print(f"✅ Candidate pool: {len(pool)} repos / 候选池共 {len(pool)} 个仓库", file=sys.stderr)
 
     # 3. Filtering / 过滤
-    print("🚫 [Step 4/7] Apply exclusion rules / 应用排除规则...", file=sys.stderr)
+    print("🚫 [Step 5/8] Apply exclusion rules / 应用排除规则...", file=sys.stderr)
     kept: list[dict] = []
     excluded = []
     for key, raw in pool.items():
@@ -1453,7 +1503,7 @@ def main() -> int:
     print(f"  → Kept {len(kept)}, excluded {len(excluded)} / 保留 {len(kept)} 个，排除 {len(excluded)} 个", file=sys.stderr)
 
     # 4. Normalize / 归一化
-    print("🧹 [Step 5/7] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
+    print("🧹 [Step 6/8] Normalize + tag / 归一化 + 打标...", file=sys.stderr)
     repos = [normalize(r) for r in kept]
 
     # 5. Tagging / 打标（type-overrides.json 优先，description/topics 兜底）
@@ -1466,7 +1516,7 @@ def main() -> int:
         r.desc_en = make_en_desc(r)
 
     # 6. Generate rankings / 生成榜单
-    print("📊 [Step 6/7] Generate rankings / 生成榜单...", file=sys.stderr)
+    print("📊 [Step 7/8] Generate rankings / 生成榜单...", file=sys.stderr)
     active_repos = [r for r in repos if r.is_active]
     legacy_repos = [r for r in repos if not r.is_active]
 
@@ -1515,6 +1565,8 @@ def main() -> int:
             active_note,
             snapshot,
             args.lang,
+            show_type=True,
+            show_form=False,
         ),
         encoding="utf-8",
     )
@@ -1526,6 +1578,8 @@ def main() -> int:
             legacy_note,
             snapshot,
             args.lang,
+            show_type=True,
+            show_form=False,
         ),
         encoding="utf-8",
     )
@@ -1537,6 +1591,8 @@ def main() -> int:
             products_note,
             snapshot,
             args.lang,
+            show_type=False,
+            show_form=False,
         ),
         encoding="utf-8",
     )
@@ -1588,7 +1644,7 @@ def main() -> int:
     write_review_queue(sort_by_stars(repos)[: args.top + args.legacy], out / review_queue_filename, args.lang)
 
     # 7. Verification / 核验
-    print("🔍 [Step 7/7] Verify rankings / 核验榜单...", file=sys.stderr)
+    print("🔍 [Step 8/8] Verify rankings / 核验榜单...", file=sys.stderr)
     verify_issues = verify_rankings(
         top_active, top_legacy, top_products, repos, cfg.get("type_overrides", {}),
     )

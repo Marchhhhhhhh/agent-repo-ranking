@@ -30,6 +30,7 @@
     "github/spec-kit": { "type": "Framework", "form": null },
     "Significant-Gravitas/AutoGPT": { "type": "Framework", "form": null },
     "anthropics/claude-code": { "type": "Product", "form": "CLI" },
+    "deepseek-ai/deepseek-harness": { "type": "Product", "form": "CLI" },
     "browser-use/browser-use": { "type": "Product", "form": "Browser-Agent" },
     "modelcontextprotocol/servers": { "type": "Middleware", "form": "MCP-Ecosystem" },
     "NousResearch/hermes-agent": { "type": "Product", "form": null },
