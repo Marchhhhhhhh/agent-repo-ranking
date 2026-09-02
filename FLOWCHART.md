@@ -91,7 +91,7 @@ flowchart LR
 
     subgraph PathB [路径 B · Seed List]
         direction TB
-        B1[读取 seed-repos.json<br/>60+ 已知仓库] --> B2[逐个调用<br/>GET /repos/{owner}/{name}]
+        B1[读取 seed-repos.json<br/>60+ 已知仓库] --> B2[逐个调用<br/>GET /repos/owner/name]
         B2 --> B3[获取完整元数据<br/>记录 source: seed-list]
     end
 
