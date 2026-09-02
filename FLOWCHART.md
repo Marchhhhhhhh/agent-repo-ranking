@@ -272,13 +272,13 @@ flowchart TD
     subgraph CONFIG [配置文件 / data/]
         direction LR
         C1[keywords.json<br/>15 个搜索词]
-        C2[seed-repos.json<br/>60+ 已知仓库]
+        C2[seed-repos.json<br/>61 个已知仓库]
         C3[awesome-lists.json<br/>6 个列表源]
         C4[exclude-patterns.json<br/>排除规则 + Agent 信号]
         C5[type-overrides.json<br/>AI/人工确认映射]
     end
 
-    subgraph CODE [search_agents.py · 1370 行]
+    subgraph CODE [search_agents.py · 1671 行]
         direction TB
         M1[GitHubClient<br/>双限流桶 + 代理支持]
         M2[discover_*<br/>三路发现]

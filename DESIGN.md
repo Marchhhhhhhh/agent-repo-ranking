@@ -116,7 +116,7 @@ IF repo in known_agent_seed_list THEN 强制收录
 ### 难点 4 · "名字不含 agent" 的 Agent 漏检 → **种子清单 + Awesome 列表交叉**
 
 **方案**：
-1. **维护 seed list**（`seed-repos.json`）：手动整理已知的 40-50 个知名 Agent 仓库（Cursor、Cline、Aider、OpenCode、Continue……）——**强制收录**，绕过关键词搜索
+1. **维护 seed list**（`seed-repos.json`）：手动整理已知的 60+ 个知名 Agent 仓库（Cursor、Cline、Aider、OpenCode、Continue……）——**强制收录**，绕过关键词搜索
 2. **爬 Awesome 列表**：以下几个高质量列表交叉：
    - `e2b-dev/awesome-ai-agents`
    - `hyp1231/awesome-llm-powered-agent`
@@ -165,8 +165,8 @@ IF repo in known_agent_seed_list THEN 强制收录
 | 通用 Agent 的问题 | 本方案的对策                       |
 | ----------------- | ---------------------------------- |
 | 训练数据陈旧      | 直接调 GitHub API 拿实时数据       |
-| 不做多信源交叉    | 12+ 关键词 + 4 个 Awesome 列表交叉 |
-| 无 seed list      | 维护 40+ 项 seed，绕过 name 关键词 |
+| 不做多信源交叉    | 15 个关键词 + 6 个 Awesome 列表交叉 |
+| 无 seed list      | 维护 60+ 项 seed，绕过 name 关键词 |
 | 边界不清一锅乱炖  | 三份榜单分开，明确排除规则         |
 | 无法人审兜底      | `?` 标签队列人工 review            |
 
