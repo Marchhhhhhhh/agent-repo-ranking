@@ -39,7 +39,10 @@ jobs:
 
       - name: Verify no secrets in tracked files
         run: |
-          if git ls-files | xargs grep -l 'ghp_\|github_pat_' 2>/dev/null; then
-            echo "ERROR: Possible secret found in tracked files!"
+          # Match real-looking tokens (ghp_ or github_pat_ followed by 36+ hex/alpha chars)
+          # Ignore obvious placeholders like ghp_your_token_here
+          if git ls-files | xargs grep -Pn 'ghp_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{36,}' 2>/dev/null; then
+            echo "ERROR: Possible real secret found in tracked files!"
             exit 1
           fi
+          echo "OK: No real secrets detected."
