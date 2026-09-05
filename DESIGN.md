@@ -28,24 +28,30 @@
 
 ## 2. 收录范围（边界定义）
 
-### 两份榜单
+### 三份榜单
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  主榜 · GitHub Agent 生态活跃 Top 50                     │
+│  活跃榜 · GitHub Agent 生态活跃 Top N                     │
 │    · 收录：产品型 Agent + 开发框架 + 中间件               │
 │    · 过滤：pushed_at 在最近 6 个月内                     │
 │    · 排序：star 数                                       │
-│    · 用途：告诉听众"社区当前在关注什么"                   │
+│    · 输出：ranking-active-top<N>-YYYY-MM-DD.md           │
 ├──────────────────────────────────────────────────────────┤
-│  副榜 · GitHub Agent 历史 Top 20（含已停维护）            │
-│    · 与主榜同标准，但不过滤 pushed_at                    │
+│  历史榜 · GitHub Agent 历史 Top N（含已停维护）           │
+│    · 与活跃榜同标准，但不过滤 pushed_at                    │
 │    · 标注活跃度（活跃 / 半活跃 / 停维护）                 │
 │    · 用途：讲历史脉络（Auto-GPT 等放这里）                │
+│    · 输出：ranking-legacy-top<N>-YYYY-MM-DD.md           │
+├──────────────────────────────────────────────────────────┤
+│  产品榜 · GitHub Agent 产品 Top N                        │
+│    · 仅 type=Product 的终端可用 Agent 产品                │
+│    · 不含框架、中间件                                    │
+│    · 输出：ranking-products-top<N>-YYYY-MM-DD.md         │
 └──────────────────────────────────────────────────────────┘
 ```
 
-### 收录标准（主榜和副榜 1）
+### 收录标准（活跃榜、历史榜和产品榜）
 
 **符合以下 3 类之一**：
 1. **产品型 Agent**：终端用户能装/能用（Cursor、Cline、Aider、OpenCode）
@@ -188,15 +194,17 @@ IF repo in known_agent_seed_list THEN 强制收录
 │    · seed-repos.json（强制收录清单）                     │
 │    · awesome-lists.json（Awesome 列表 URL）             │
 ├─────────────────────────────────────────────────────────┤
-│  Step 2 · 多路发现（并行）                                │
+│  Step 2 · 多路发现（四路）                                │
 │    · 路径 A：关键词搜索 GitHub Search API                │
 │    · 路径 B：读取 seed list 直接拿仓库                    │
 │    · 路径 C：抓 Awesome 列表 → 抽取 repo URL             │
+│    · 路径 D：基于 GitHub Topics 话题标签搜索              │
 │    · 合并去重 → 得到候选池（预计 200-500 个）            │
 ├─────────────────────────────────────────────────────────┤
 │  Step 3 · 过滤                                          │
 │    · 排除 Awesome / papers / model runtime               │
-│    · 排除 archived / fork（除非高于 upstream）            │
+│    · 排除 archived / fork                                │
+│    · 排除 min_stars 不足的                               │
 │    · 排除描述不含 Agent 相关词的（除非在 seed）           │
 ├─────────────────────────────────────────────────────────┤
 │  Step 4 · 元数据补全                                     │
@@ -208,13 +216,16 @@ IF repo in known_agent_seed_list THEN 强制收录
 │    · 无法自动判定的进 `?` 队列                            │
 ├─────────────────────────────────────────────────────────┤
 │  Step 6 · 生成榜单                                       │
-│    · 按 pushed_at 分主榜 / 历史榜                        │
-│    · 按 star 排序取 Top 50 / Top 20                     │
+│    · 按类型分活跃榜 / 历史榜 / 产品榜                    │
+│    · 按 star 排序取 Top N                                │
 ├─────────────────────────────────────────────────────────┤
 │  Step 7 · 输出                                          │
-│    · JSON（结构化，供后续处理）                          │
-│    · Markdown（人类可读，适合直接引用到文档）             │
-│    · CSV（Excel 分析用）                                 │
+│    · ranking-active-top<N>-YYYY-MM-DD.md                │
+│    · ranking-legacy-top<N>-YYYY-MM-DD.md                │
+│    · ranking-products-top<N>-YYYY-MM-DD.md              │
+│    · ranking-all-YYYY-MM-DD.csv                         │
+│    · snapshot-YYYY-MM-DD.json                           │
+│    · metadata-YYYY-MM-DD.json                           │
 │    · review-queue-YYYY-MM-DD.md（人审队列，边界 case）              │
 └─────────────────────────────────────────────────────────┘
 ```

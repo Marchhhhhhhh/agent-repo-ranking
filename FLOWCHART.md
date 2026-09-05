@@ -15,11 +15,12 @@ flowchart TD
     GH_OK --> DISCOVER
     GH_WARN --> DISCOVER
 
-    subgraph DISCOVER [Phase 1 · 三路发现]
+    subgraph DISCOVER [Phase 1 · 四路发现]
         direction TB
         A[路径 A · 关键词搜索<br/>15 个关键词 × 每词 300 条]
         B[路径 B · Seed list<br/>60+ 已知仓库强制收录]
         C[路径 C · Awesome 列表<br/>6 个列表 README 抽取 URL]
+        D[路径 D · Topics 话题搜索<br/>基于 GitHub Topics 标签]
     end
 
     DISCOVER --> MERGE[合并去重<br/>记录 discovery_source]
@@ -64,13 +65,13 @@ flowchart TD
 
     subgraph OUTPUT [Phase 4 · 输出]
         direction LR
-        O1[活跃榜 Top N<br/>Active .md]
-        O2[历史榜 Top N<br/>Legacy .md]
-        O3[产品榜 Top N<br/>Products .md]
-        O4[snapshot.json]
-        O5[metadata.json]
-        O6[ranking-all.csv]
-        O7[review-queue.md]
+        O1[活跃榜 Top N<br/>ranking-active-top&lt;N&gt;-<br/>YYYY-MM-DD.md]
+        O2[历史榜 Top N<br/>ranking-legacy-top&lt;N&gt;-<br/>YYYY-MM-DD.md]
+        O3[产品榜 Top N<br/>ranking-products-top&lt;N&gt;-<br/>YYYY-MM-DD.md]
+        O4[snapshot-YYYY-MM-DD.json]
+        O5[metadata-YYYY-MM-DD.json]
+        O6[ranking-all-YYYY-MM-DD.csv]
+        O7[review-queue-<br/>YYYY-MM-DD.md]
     end
 
     OUTPUT --> DONE([✅ 完成])
@@ -78,7 +79,7 @@ flowchart TD
 
 ---
 
-## 2. Phase 1 · 三路发现机制
+## 2. Phase 1 · 四路发现机制
 
 ```mermaid
 flowchart LR
@@ -103,9 +104,17 @@ flowchart LR
         C4 --> C5[新 URL 补拉元数据<br/>已有则仅追加 source]
     end
 
+    subgraph PathD [路径 D · Topics 话题搜索]
+        direction TB
+        D1[读取 topics 配置] --> D2[逐个 topic 调用<br/>GitHub Search API]
+        D2 --> D3[topic:xxx stars:>100<br/>每话题取前 300 条]
+        D3 --> D4[去重合并<br/>记录 source: topic:xxx]
+    end
+
     PathA --> MERGE[合并候选池<br/>dict full_name → raw data]
     PathB --> MERGE
     PathC --> MERGE
+    PathD --> MERGE
 
     MERGE --> POOL[候选池<br/>200~500 个仓库]
 ```

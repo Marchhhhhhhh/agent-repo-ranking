@@ -83,6 +83,7 @@ By default, files are written to `output/`.
 - `snapshot-YYYY-MM-DD.json`
 - `metadata-YYYY-MM-DD.json`
 - `review-queue-YYYY-MM-DD.md`
+- `verification-YYYY-MM-DD.md`
 
 Notes:
 

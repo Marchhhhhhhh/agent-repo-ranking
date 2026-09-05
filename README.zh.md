@@ -83,6 +83,7 @@ python3 search_agents.py --quiet
 - `snapshot-YYYY-MM-DD.json`
 - `metadata-YYYY-MM-DD.json`
 - `review-queue-YYYY-MM-DD.md`
+- `verification-YYYY-MM-DD.md`
 
 补充说明：
 

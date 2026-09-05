@@ -1,0 +1,45 @@
+# CI: lint + quick smoke test
+# Runs on every push and pull request to main
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Syntax check (all .py files)
+        run: python3 -m py_compile search_agents.py
+
+      - name: Verify data/ configs are valid JSON
+        run: |
+          for f in data/*.json; do
+            echo "  Checking $f"
+            python3 -c "import json; json.load(open('$f'))"
+          done
+
+      - name: Smoke test --help (exits 0, no API calls)
+        run: python3 search_agents.py --help
+
+      - name: Verify no secrets in tracked files
+        run: |
+          if git ls-files | xargs grep -l 'ghp_\|github_pat_' 2>/dev/null; then
+            echo "ERROR: Possible secret found in tracked files!"
+            exit 1
+          fi

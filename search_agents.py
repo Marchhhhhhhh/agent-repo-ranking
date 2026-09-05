@@ -2,13 +2,15 @@
 """
 GitHub Agent repository ranking generator.
 
-Collects Agent-related repositories from GitHub and generates two ranked outputs:
+Collects Agent-related repositories from GitHub and generates three ranked outputs:
   · Active Top N
   · Legacy Top N
+  · Products Top N
 
-依据 DESIGN.md 中的方法，从 GitHub 收集 Agent 相关仓库并生成两份榜单：
-  · 主榜 · 活跃 Top N
-  · 副榜 · 历史 Top N（含已停维护）
+依据 DESIGN.md 中的方法，从 GitHub 收集 Agent 相关仓库并生成三份榜单：
+  · 活跃榜 · Active Top N
+  · 历史榜 · Legacy Top N（含已停维护）
+  · 产品榜 · Products Top N（仅终端可用产品）
 
 Usage / 用法:
   python3 search_agents.py                          # Run with defaults / 用默认配置跑
@@ -1463,7 +1465,7 @@ def main() -> int:
     print("📂 Loading config... / 加载配置...", file=sys.stderr)
     cfg = load_config(args.data_dir)
 
-    # 2. Three discovery paths / 三路发现
+    # 2. Four discovery paths / 四路发现
     print("🔎 [Step 1/8] Keyword search / 关键词搜索发现...", file=sys.stderr)
     pool = discover_via_keywords(gh, cfg["keywords"]["keywords"])
 
