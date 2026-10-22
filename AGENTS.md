@@ -20,3 +20,10 @@ Instructions for AI agents (Claude Code, Cursor, WorkBuddy, etc.) working in thi
 - Correction loop: run script → review `output/review-queue-*.md` → write conclusions into `data/type-overrides.json` (include) or `data/exclude-patterns.json` (exclude) → re-run.
 - Outputs in `output/` are dated snapshots; never edit them by hand — regenerate via the script.
 - When running the script from an agent sandbox, clear proxy env vars first (`env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY`) to avoid truncated responses.
+
+## Updating ranking-en.md / ranking-zh.md
+
+- After each new snapshot, regenerate the root ranking files with `python3 generate_ranking_md.py` (zero-dependency, stdlib only — keep it that way). Never edit `ranking-en.md` / `ranking-zh.md` by hand.
+- The generator auto-detects the two most recent `output/ranking-all-*.csv` snapshots and renders: Active Top 50, Products Top 50, a **Recently Surging / 近期飙升** section (biggest star gains vs the previous snapshot), a **Newly Added / 新收录** subsection (repos entering the dataset for the first time), and one-line descriptions.
+- The surging/newly-added sections are a required part of the ranking files — always include them when refreshing rankings. Thresholds (min gain/stars, top-N) live at the top of `generate_ranking_md.py`.
+- Commit the regenerated `ranking-en.md` / `ranking-zh.md` together with any script changes.

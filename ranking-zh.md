@@ -123,6 +123,42 @@
 
 ---
 
+## 近期飙升
+
+> 对比 2026-10-12 与 2026-10-21 两期快照，星数增长最多的仓库（排名为全量总榜名次）
+
+| 项目 | 星数增量 | 当前星数 | 总榜排名 | 简介 |
+|------|---------|---------|---------|------|
+| [morluto/rea](https://github.com/morluto/rea) | +225,124 | 353,071 | 16 → 1 | Agent 相关项目（Reverse engineer anything with agents, from app behavior down to native binaries.） |
+| [Ebony-Vinyl/dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) | +21,689 | 32,501 | 2336 → 2323 | 在 dsh 里装上这个插件即可，无需登录、注册或填 API Key，就能使用包括 DeepSeek V4.1 Flash、Kimi K3 在内的前沿模型——完全免费，不限量。 All you do is install this plugin in dsh: no login,… |
+| [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) | +15,830 | 62,087 | 1953 → 1962 | Agent 相关项目（The job search that runs on your machine. AI job application framework built on Claude Code: evaluate postings, tailor CVs, writ… |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | +12,188 | 299,245 | 2 → 3 | 工程师向的 Agent 技能合集（.agents 目录直出） |
+| [stablyai/orca](https://github.com/stablyai/orca) | +10,257 | 100,467 | 31 → 26 | 并行调度成群编码 Agent 的 Agent 开发环境（ADE） |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | +9,185 | 170,627 | 8 → 9 | 让 AI Agent 像最懒资深工程师一样思考：能不写的代码就不写 |
+| [xerj-org/xerj](https://github.com/xerj-org/xerj) | +8,943 | 12,586 | 975 → 312 | MCP（模型上下文协议）相关项目（Local-first search engine and MCP server for AI agents. One Rust binary indexes code, docs, logs, JSONL/CSV and PDFs for B… |
+| [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) | +8,586 | 256,555 | 2314 → 2317 | DeepSeek 出品的开源 Agent 框架，一切皆插件的架构设计 |
+| [yetone/magpie](https://github.com/yetone/magpie) | +8,515 | 18,555 | 876 → 246 | Agent 相关项目（Every agent's model. One place. Codex on DeepSeek, Claude Code on Kimi, from the menu bar.） |
+| [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) | +7,830 | 59,269 | 1224 → 1226 | Agent 相关项目（Editorial diagram design for Claude Code, Codex, GitHub Copilot, Cursor, Factory Droid, and Pi. 44 diagram types. Self-contained… |
+
+### 新收录仓库
+
+> 本期新进入数据集的高星仓库
+
+| 项目 | 星数 | 总榜排名 | 简介 |
+|------|------|---------|------|
+| [DayuanJiang/next-ai-draw-io](https://github.com/DayuanJiang/next-ai-draw-io) | 36,333 | 1963 | MCP（模型上下文协议）相关项目（Draw and edit draw.io diagrams by chatting with an AI. Web app, desktop app, and an MCP server for Claude Code, Cursor, Co… |
+| [dapr/dapr](https://github.com/dapr/dapr) | 26,157 | 2327 | Agent 相关项目（Dapr is a portable runtime for building distributed applications across cloud and edge, combining event-driven architecture with… |
+| [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) | 18,021 | 256 | Agent 技能 / 能力扩展（An agent skill for creating detailed, interactive isometric illustrations of real-world machines and complex systems. Gener… |
+| [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | 15,077 | 294 | Agent 相关项目（This repo hosts Prowler OSS (CLI and Local Server). Prowler is the world’s most widely used open-source cloud security platform… |
+| [tw93/Kami](https://github.com/tw93/Kami) | 12,044 | 319 | Agent 相关项目（Good content deserves good paper. Layout rules and templates that let AI agents export PDF, PNG and editable PowerPoint.） |
+| [trailhq/Trail-Code](https://github.com/trailhq/Trail-Code) | 10,566 | 876 | 编码 Agent 相关项目（Turbocharge Claude Code, Cursor, Codex, Gemini & every coding agent: faster, cheaper, with contextual understanding specific… |
+| [jub0t/Concat](https://github.com/jub0t/Concat) | 10,227 | 2051 | 可自托管项目（The truly free, open-source, local-first, cross-platform CapCut replacement. Scriptable through a JSON-RPC API & MCP.） |
+| [eze-is/web-access](https://github.com/eze-is/web-access) | 9,224 | 883 | 给你的本机 Agent（如 Claude Code、Grok Bot 等）装上完整联网能力的 Skill：三层通道调度 + 浏览器 CDP + 并行分治，自动积累站点经验，不断优化联网效率 |
+| [maximhq/bifrost](https://github.com/maximhq/bifrost) | 8,985 | 364 | Agent 相关项目（Open-source, high-performance AI gateway that works as your LLM gateway, MCP gateway and agent gateway. One OpenAI-compatible AP… |
+| [homarr-labs/dashboard-icons](https://github.com/homarr-labs/dashboard-icons) | 8,898 | 366 | MCP（模型上下文协议）相关项目（3,400+ curated icons and logos for dashboards and AI agents. SVG, PNG and WEBP on a free CDN, plus an MCP server for Claud… |
+
+---
+
 ### 一句话描述
 
 1. **openclaw/openclaw** - 开源个人 AI 助手，任意系统与平台均可部署（OpenClaw）

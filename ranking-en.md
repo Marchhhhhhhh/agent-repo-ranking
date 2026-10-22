@@ -123,6 +123,42 @@
 
 ---
 
+## Recently Surging
+
+> Biggest star gains between the 2026-10-12 and 2026-10-21 snapshots (rank refers to the full all-repo list)
+
+| Project | +Stars | Stars | Rank | Description |
+|---------|--------|-------|------|-------------|
+| [morluto/rea](https://github.com/morluto/rea) | +225,124 | 353,071 | 16 → 1 | Reverse engineer anything with agents, from app behavior down to native binaries. |
+| [Ebony-Vinyl/dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) | +21,689 | 32,501 | 2336 → 2323 | An Agent-related product. |
+| [MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) | +15,830 | 62,087 | 1953 → 1962 | The job search that runs on your machine. AI job application framework built on Claude Code: evaluate postings, tailor CVs, write cover let… |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | +12,188 | 299,245 | 2 → 3 | Skills for Real Engineers. Straight from my .agents directory. |
+| [stablyai/orca](https://github.com/stablyai/orca) | +10,257 | 100,467 | 31 → 26 | Orca is the place for working with a fleet of agents (e.g. Grok Bot, Claude Code). Run any coding agent with your own subscription. Availab… |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | +9,185 | 170,627 | 8 → 9 | Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote. |
+| [xerj-org/xerj](https://github.com/xerj-org/xerj) | +8,943 | 12,586 | 975 → 312 | Local-first search engine and MCP server for AI agents. One Rust binary indexes code, docs, logs, JSONL/CSV and PDFs for BM25 full-text, ve… |
+| [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) | +8,586 | 256,555 | 2314 → 2317 | DeepSeek's open-source agent harness built on an everything-is-a-plugin architecture. |
+| [yetone/magpie](https://github.com/yetone/magpie) | +8,515 | 18,555 | 876 → 246 | Every agent's model. One place. Codex on DeepSeek, Claude Code on Kimi, from the menu bar. |
+| [cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) | +7,830 | 59,269 | 1224 → 1226 | Editorial diagram design for Claude Code, Codex, GitHub Copilot, Cursor, Factory Droid, and Pi. 44 diagram types. Self-contained HTML + SVG… |
+
+### Newly Added to the Dataset
+
+> Notable repos included for the first time in this snapshot
+
+| Project | Stars | Rank | Description |
+|---------|-------|------|-------------|
+| [DayuanJiang/next-ai-draw-io](https://github.com/DayuanJiang/next-ai-draw-io) | 36,333 | 1963 | Draw and edit draw.io diagrams by chatting with an AI. Web app, desktop app, and an MCP server for Claude Code, Cursor, Codex and VS Code. |
+| [dapr/dapr](https://github.com/dapr/dapr) | 26,157 | 2327 | Dapr is a portable runtime for building distributed applications across cloud and edge, combining event-driven architecture with workflow o… |
+| [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) | 18,021 | 256 | An agent skill for creating detailed, interactive isometric illustrations of real-world machines and complex systems. Generates polished SV… |
+| [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | 15,077 | 294 | This repo hosts Prowler OSS (CLI and Local Server). Prowler is the world’s most widely used open-source cloud security platform that automa… |
+| [tw93/Kami](https://github.com/tw93/Kami) | 12,044 | 319 | Good content deserves good paper. Layout rules and templates that let AI agents export PDF, PNG and editable PowerPoint. |
+| [trailhq/Trail-Code](https://github.com/trailhq/Trail-Code) | 10,566 | 876 | Turbocharge Claude Code, Cursor, Codex, Gemini & every coding agent: faster, cheaper, with contextual understanding specific to your codeba… |
+| [jub0t/Concat](https://github.com/jub0t/Concat) | 10,227 | 2051 | The truly free, open-source, local-first, cross-platform CapCut replacement. Scriptable through a JSON-RPC API & MCP. |
+| [eze-is/web-access](https://github.com/eze-is/web-access) | 9,224 | 883 | An Agent-related project. |
+| [maximhq/bifrost](https://github.com/maximhq/bifrost) | 8,985 | 364 | Open-source, high-performance AI gateway that works as your LLM gateway, MCP gateway and agent gateway. One OpenAI-compatible API for 10,00… |
+| [homarr-labs/dashboard-icons](https://github.com/homarr-labs/dashboard-icons) | 8,898 | 366 | 3,400+ curated icons and logos for dashboards and AI agents. SVG, PNG and WEBP on a free CDN, plus an MCP server for Claude Code, Codex, Ch… |
+
+---
+
 ### One-line Descriptions
 
 1. **openclaw/openclaw** - The AI that really does things. Any OS. Any Platform. The lobster way.
