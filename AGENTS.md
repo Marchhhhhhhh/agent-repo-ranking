@@ -14,6 +14,26 @@ Instructions for AI agents (Claude Code, Cursor, WorkBuddy, etc.) working in thi
 - Example: `fix: catch IncompleteRead in retry loop to survive truncated responses`
 - Re-run `python3 search_agents.py` after editing `data/*.json` so outputs reflect the change, and commit configs + regenerated outputs together when both changed.
 
+## Trigger: "获取最新排名" (Get Latest Ranking)
+
+When the user says **"获取最新排名"** (or an unambiguous English equivalent such as "get the latest ranking" / "refresh the rankings"), execute this workflow end to end without asking for confirmation:
+
+1. **Run the collector.** Fetch a fresh snapshot:
+   ```bash
+   env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY python3 search_agents.py
+   ```
+   The run hits the GitHub API for thousands of repos, so it can take several minutes — if your shell has a short timeout, run it in the background and redirect output to a log file, then read the log. Confirm a new dated snapshot was written to `output/` (`ranking-all-<date>.csv`, `snapshot-<date>.json`, `ranking-active-top50-<date>.md`, `ranking-products-top50-<date>.md`, plus review-queue/verification/metadata files). If the run fails or a dated output is missing, stop and report the error — do not hand-write outputs.
+
+2. **Regenerate the root ranking files.** Run `python3 generate_ranking_md.py`. It auto-detects the two most recent snapshots and rewrites `ranking-en.md` / `ranking-zh.md` with Active Top 50, Products Top 50, **Recently Surging / 近期飙升** and **Newly Added / 新收录**. Verify both files now show the new snapshot timestamp, 100 table rows (2 × 50), and 50 description items; never edit these files by hand.
+
+3. **Commit and push.** `output/` is gitignored, so the commit normally contains only `ranking-en.md` / `ranking-zh.md` (plus any script or `data/*.json` changes). Stage them, inspect `git diff --cached` for secrets (see Security above), then commit with an English conventional message (e.g. `docs: refresh rankings with <YYYY-MM-DD> snapshot`) and push to the remote:
+   ```bash
+   git push origin main
+   ```
+   Report the final commit hash, the snapshot timestamp, and the headline movers (top surging / newly added repos) back to the user.
+
+Optional follow-ups (do them only if the user asks, or if obviously needed): review `output/review-queue-<date>.md` and record conclusions in `data/type-overrides.json` / `data/exclude-patterns.json`, then repeat steps 1–3.
+
 ## Project Workflow
 
 - This repo generates ranking snapshots of the GitHub Agent ecosystem. Core script: `search_agents.py` (zero-dependency, stdlib only — keep it that way).
