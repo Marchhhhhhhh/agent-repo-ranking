@@ -11,10 +11,17 @@ on:
 
 jobs:
   lint-and-smoke:
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.12"]
+        include:
+          # setup-python has no 3.9 build for ubuntu-26.04 (current ubuntu-latest),
+          # so the minimum supported version is pinned to the 24.04 image.
+          - python-version: "3.9"
+            os: ubuntu-24.04
+          - python-version: "3.12"
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +32,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Syntax check (all .py files)
-        run: python3 -m py_compile search_agents.py
+        run: python3 -m py_compile search_agents.py generate_ranking_md.py
 
       - name: Verify data/ configs are valid JSON
         run: |
